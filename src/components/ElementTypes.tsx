@@ -134,18 +134,19 @@ export interface ProductElement {
   height: number;
 }
 
-export type Element = 
-  | TextElement 
-  | ImageElement 
-  | VideoElement 
-  | AudioElement 
-  | ButtonElement 
-  | DividerElement 
-  | ShapeElement 
-  | SpacerElement 
+export type Element =
+  | TextElement
+  | ImageElement
+  | VideoElement
+  | AudioElement
+  | ButtonElement
+  | DividerElement
+  | ShapeElement
+  | SpacerElement
   | ProductElement;
 
 export interface Page {
   id: string;
   elements: Element[];
+  backgroundColor?: string;
 }

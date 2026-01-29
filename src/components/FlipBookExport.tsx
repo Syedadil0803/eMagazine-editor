@@ -4,6 +4,7 @@ interface Page {
   content: any;
   order: number;
   type: 'cover' | 'content' | 'back_cover';
+  backgroundColor?: string;
 }
 
 interface FlipBookExportProps {
@@ -135,8 +136,8 @@ export const generateFlipBookHtml = ({
 
       return `
       <!-- ${page.name} -->
-      <div class="page ${isCover ? "--cover" : ""}" ${isCover ? 'data-density="hard"' : ""}>
-        <div class="page-content">
+      <div class="page ${isCover ? "--cover" : ""}" ${isCover ? 'data-density="hard"' : ""} style="background-color: ${page.backgroundColor || '#ffffff'} !important">
+        <div class="page-content" style="background-color: ${page.backgroundColor || '#ffffff'} !important">
           ${pageContent || '<div style="text-align: center; padding: 50px; color: #666;">Empty Page</div>'}
         </div>
         <div class="page-footer">
@@ -423,7 +424,6 @@ export const generateFlipBookHtml = ({
     .page {
       width: 100%;
       height: 100%;
-      background: white;
       color: #000;
       position: relative;
       overflow: hidden;
@@ -457,17 +457,7 @@ export const generateFlipBookHtml = ({
       z-index: 20;
     }
     
-    .page-content::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 30px;
-      background: linear-gradient(transparent, rgba(255,255,255,0.9));
-      pointer-events: none;
-      z-index: 10;
-    }
+
     
     /* Force columns to stay side-by-side */
     .page-content table[class*="mj-column"] {
