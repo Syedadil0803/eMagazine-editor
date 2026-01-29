@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "keywords": [],
-  "author": "",
+  "author": "Mohammed Adil Syed",
   "license": "ISC",
   "description": "Custom flipbook editor application",
   "dependencies": {

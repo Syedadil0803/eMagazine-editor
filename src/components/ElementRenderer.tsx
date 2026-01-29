@@ -9,10 +9,10 @@ interface ElementRendererProps {
   onMouseDown?: (id: string) => void;
 }
 
-export const ElementRenderer: React.FC<ElementRendererProps> = ({ 
-  element, 
-  isSelected, 
-  onSelect, 
+export const ElementRenderer: React.FC<ElementRendererProps> = ({
+  element,
+  isSelected,
+  onSelect,
   onUpdate,
   onMouseDown
 }) => {
@@ -20,8 +20,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
   const [resizeDirection, setResizeDirection] = useState('');
   const elementRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 });
-  
-  const isResizable = element.type === 'text' || element.type === 'image' || element.type === 'video' || element.type === 'audio';
+
+  const isResizable = element.type === 'text' || element.type === 'image' || element.type === 'video' || element.type === 'audio' || element.type === 'spacer' || element.type === 'divider';
   const baseStyle = {
     position: 'absolute' as const,
     left: `${element.x}px`,
@@ -51,12 +51,12 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
   const handleResizeStart = (e: React.MouseEvent, direction: string) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     if (!onUpdate) return;
-    
+
     setIsResizing(true);
     setResizeDirection(direction);
-    
+
     startPos.current = {
       x: e.clientX,
       y: e.clientY,
@@ -65,16 +65,16 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       left: element.x,
       top: element.y
     };
-    
+
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startPos.current.x;
       const deltaY = moveEvent.clientY - startPos.current.y;
-      
+
       let newWidth = startPos.current.width;
       let newHeight = startPos.current.height;
       let newLeft = startPos.current.left;
       let newTop = startPos.current.top;
-      
+
       // Handle different resize directions
       if (direction.includes('right')) {
         newWidth = Math.max(50, startPos.current.width + deltaX);
@@ -96,46 +96,42 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
           newTop = startPos.current.top + startPos.current.height - 30;
         }
       }
-      
+
       // Update both size and position for left/top resizing
       const updates: Partial<Element> = {
         width: newWidth,
         height: newHeight
       };
-      
+
       if (direction.includes('left') || direction.includes('top')) {
         updates.x = newLeft;
         updates.y = newTop;
       }
-      
+
       onUpdate(element.id, updates);
     };
-    
+
     const handleMouseUp = () => {
       setIsResizing(false);
       setResizeDirection('');
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
 
   const renderResizeHandles = () => {
     if (!isSelected || !isResizable) return null;
-    
+
     const handles = [
-      { position: 'top-left', cursor: 'nw-resize', style: { top: '-8px', left: '-8px' } },
-      { position: 'top-right', cursor: 'ne-resize', style: { top: '-8px', right: '-8px' } },
-      { position: 'bottom-left', cursor: 'sw-resize', style: { bottom: '-8px', left: '-8px' } },
-      { position: 'bottom-right', cursor: 'se-resize', style: { bottom: '-8px', right: '-8px' } },
       { position: 'top', cursor: 'n-resize', style: { top: '-8px', left: '50%', transform: 'translateX(-50%)' } },
       { position: 'bottom', cursor: 's-resize', style: { bottom: '-8px', left: '50%', transform: 'translateX(-50%)' } },
       { position: 'left', cursor: 'w-resize', style: { left: '-8px', top: '50%', transform: 'translateY(-50%)' } },
       { position: 'right', cursor: 'e-resize', style: { right: '-8px', top: '50%', transform: 'translateY(-50%)' } }
     ];
-    
+
     return handles.map(handle => (
       <div
         key={handle.position}
@@ -157,7 +153,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
         onMouseDown={(e) => handleResizeStart(e, handle.position)}
         onMouseEnter={(e) => {
           const element = e.currentTarget;
-          element.style.transform = handle.style.transform ? 
+          element.style.transform = handle.style.transform ?
             handle.style.transform.replace('scale(1)', '') + ' scale(1.3)' : 'scale(1.3)';
           element.style.backgroundColor = '#40a9ff';
           element.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4), 0 0 0 2px rgba(24,144,255,0.5)';
@@ -318,22 +314,34 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
         const divEl = element as any;
         return (
           <div
+            ref={elementRef}
             style={{
               ...baseStyle,
               height: `${divEl.height}px`,
               backgroundColor: divEl.color,
               border: 'none',
               borderBottom: `1px ${divEl.style} ${divEl.color}`,
-              padding: 0
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '10px',
+              color: '#999',
+              cursor: 'move'
             }}
+            onMouseDown={handleMouseDown}
             onClick={handleClick}
-          />
+          >
+            <span style={{ backgroundColor: 'white', padding: '2px 4px', borderRadius: '2px' }}>Divider</span>
+            {renderResizeHandles()}
+          </div>
         );
 
       case 'spacer':
         const spacerEl = element as any;
         return (
           <div
+            ref={elementRef}
             style={{
               ...baseStyle,
               border: '1px dashed #ccc',
@@ -344,9 +352,11 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               fontSize: '12px',
               color: '#999'
             }}
+            onMouseDown={handleMouseDown}
             onClick={handleClick}
           >
             Spacer {spacerEl.width}×{spacerEl.height}
+            {renderResizeHandles()}
           </div>
         );
 

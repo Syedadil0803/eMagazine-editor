@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Button, Input, Select, Card, Space, Modal, Slider, ColorPicker, Checkbox } from '@arco-design/web-react';
-import { IconPlus, IconDelete, IconImage, IconFile, IconMinus, IconPlayCircle, IconSound } from '@arco-design/web-react/icon';
+import { Button, Input, Select, Card, Space, Slider, ColorPicker } from '@arco-design/web-react';
+import { IconPlus, IconDelete, IconImage, IconMinus, IconPlayCircle, IconSound, IconFile, IconExpand } from '@arco-design/web-react/icon';
 import { Element, Page } from '../../components/ElementTypes';
 import { ElementRenderer } from '../../components/ElementRenderer';
 import { generateFlipBookHtml } from '../../components/FlipBookExport';
@@ -15,8 +15,6 @@ const FlipbookEditor: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [elementType, setElementType] = useState<string>('text');
 
   // Convert flipbook pages to magazine format for preview
   const convertToMagazinePages = () => {
@@ -57,7 +55,7 @@ const FlipbookEditor: React.FC = () => {
       },
       templateSubject: 'Flipbook Preview'
     });
-    
+
     const win = window.open("", "_blank");
     if (win) {
       win.document.write(html);
@@ -205,8 +203,6 @@ const FlipbookEditor: React.FC = () => {
       newPages[currentPage].elements.push(newElement);
       return newPages;
     });
-    
-    setShowAddModal(false);
   }, [currentPage]);
 
   const updateElement = useCallback((elementId: string, updates: Partial<Element>) => {
@@ -263,7 +259,16 @@ const FlipbookEditor: React.FC = () => {
     if (!selectedEl) return null;
 
     return (
-      <Card title={`${selectedEl.type.charAt(0).toUpperCase() + selectedEl.type.slice(1)} Properties`} style={{ width: '350px' }}>
+      <Card
+        title={`${selectedEl.type.charAt(0).toUpperCase() + selectedEl.type.slice(1)} Properties`}
+        style={{
+          width: '100%',
+          borderRadius: '16px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+          border: '1px solid #f0f0f0'
+        }}
+        headerStyle={{ borderBottom: '1px solid #f0f0f0' }}
+      >
         <Space direction="vertical" style={{ width: '100%' }}>
           {/* Common properties */}
           <div>
@@ -274,7 +279,7 @@ const FlipbookEditor: React.FC = () => {
               style={{ marginTop: '8px' }}
             />
           </div>
-          
+
           <div>
             <label>Y Position:</label>
             <Input
@@ -312,7 +317,7 @@ const FlipbookEditor: React.FC = () => {
               />
             </div>
           )}
-          
+
           {/* Video specific properties */}
           {selectedEl.type === 'video' && (
             <>
@@ -334,7 +339,7 @@ const FlipbookEditor: React.FC = () => {
               </div>
             </>
           )}
-          
+
           {/* Audio specific properties */}
           {selectedEl.type === 'audio' && (
             <>
@@ -348,7 +353,7 @@ const FlipbookEditor: React.FC = () => {
               </div>
             </>
           )}
-          
+
           {/* Image specific properties */}
           {selectedEl.type === 'image' && (
             <>
@@ -370,10 +375,10 @@ const FlipbookEditor: React.FC = () => {
               </div>
             </>
           )}
-          
-          <Button 
-            type="primary" 
-            status="danger" 
+
+          <Button
+            type="primary"
+            status="danger"
             onClick={() => deleteElement(selectedEl.id)}
             style={{ width: '100%' }}
           >
@@ -388,9 +393,6 @@ const FlipbookEditor: React.FC = () => {
     <div className="flipbook-editor-container">
       <div style={{ marginBottom: '20px' }}>
         <Space wrap>
-          <Button type="primary" onClick={() => setShowAddModal(true)}>
-            <IconPlus /> Add Element
-          </Button>
           <Button onClick={addNewPage}>
             <IconPlus /> Add Page
           </Button>
@@ -405,7 +407,7 @@ const FlipbookEditor: React.FC = () => {
               </Select.Option>
             ))}
           </Select>
-          <Button 
+          <Button
             type="outline"
             onClick={onPreviewFlipbook}
             style={{ marginLeft: '20px' }}
@@ -415,65 +417,116 @@ const FlipbookEditor: React.FC = () => {
         </Space>
       </div>
 
-      {/* Editor Canvas */}
-      <div style={{ display: 'flex', gap: '20px' }}>
-          {/* Editor Canvas */}
-          <div>
-            <div
-              className="flipbook-canvas"
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            >
-              {pages[currentPage]?.elements.map((element) => (
-                <ElementRenderer
-                  key={element.id}
-                  element={element}
-                  isSelected={selectedElement === element.id}
-                  onSelect={setSelectedElement}
-                  onUpdate={updateElement}
-                  onMouseDown={handleMouseDown}
-                />
-              ))}
-            </div>
+      {/* Main Editor Layout */}
+      <div style={{ display: 'flex', gap: '20px', height: 'calc(100vh - 120px)' }}>
+        {/* Left Sidebar - Element Selection */}
+        {/* Left Sidebar - Element Selection */}
+        <div style={{
+          width: '280px',
+          background: '#ffffff',
+          padding: '24px',
+          borderRadius: '20px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+          display: 'flex',
+          flexDirection: 'column',
+          height: 'fit-content',
+          border: '1px solid #f0f0f0'
+        }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '18px', color: '#111827', letterSpacing: '-0.02em' }}>Elements</h4>
+            <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#9ca3af' }}>Click to add to page</p>
           </div>
 
-          {/* Properties Panel */}
-          {renderPropertiesPanel()}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+            {[
+              { type: 'text', label: 'Text', icon: <IconFile />, color: '#4f46e5', bg: '#eef2ff' },
+              { type: 'image', label: 'Image', icon: <IconImage />, color: '#db2777', bg: '#fce7f3' },
+              { type: 'video', label: 'Video', icon: <IconPlayCircle />, color: '#dc2626', bg: '#fef2f2' },
+              { type: 'audio', label: 'Audio', icon: <IconSound />, color: '#d97706', bg: '#fffbeb' },
+              { type: 'divider', label: 'Divider', icon: <IconMinus />, color: '#4b5563', bg: '#f3f4f6' },
+              { type: 'spacer', label: 'Spacer', icon: <IconExpand />, color: '#7c3aed', bg: '#f5f3ff' },
+            ].map((item) => (
+              <div
+                key={item.type}
+                onClick={() => addElement(item.type)}
+                style={{
+                  height: '110px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  border: '1px solid #f3f4f6',
+                  borderRadius: '16px',
+                  background: '#ffffff',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = `0 12px 20px -5px ${item.bg.replace('rgb', 'rgba').replace(')', ', 0.5)')}`;
+                  e.currentTarget.style.borderColor = item.color;
+                  e.currentTarget.style.background = '#fafafa';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = '#f3f4f6';
+                  e.currentTarget.style.background = '#ffffff';
+                }}
+              >
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '14px',
+                  background: item.bg,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: item.color,
+                  fontSize: '22px',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                }}>
+                  {item.icon}
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: '#4b5563' }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-      {/* Add Element Modal */}
-      <Modal
-        title="Add Element"
-        visible={showAddModal}
-        onCancel={() => setShowAddModal(false)}
-        footer={null}
-        width={600}
-      >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          <Button onClick={() => addElement('text')}>
-            <IconPlus /> Text
-          </Button>
-          <Button onClick={() => addElement('image')}>
-            <IconImage /> Image
-          </Button>
-          <Button onClick={() => addElement('video')}>
-            <IconPlayCircle /> Video
-          </Button>
-          <Button onClick={() => addElement('audio')}>
-            <IconSound /> Audio
-          </Button>
-          <Button onClick={() => addElement('button')}>
-            <IconPlus /> Button
-          </Button>
-          <Button onClick={() => addElement('divider')}>
-            <IconMinus /> Divider
-          </Button>
-          <Button onClick={() => addElement('spacer')}>
-            <IconFile /> Spacer
-          </Button>
+        {/* Center - Editor Canvas */}
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+          <div
+            className="flipbook-canvas"
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            {pages[currentPage]?.elements.map((element) => (
+              <ElementRenderer
+                key={element.id}
+                element={element}
+                isSelected={selectedElement === element.id}
+                onSelect={setSelectedElement}
+                onUpdate={updateElement}
+                onMouseDown={handleMouseDown}
+              />
+            ))}
+          </div>
         </div>
-      </Modal>
+
+        {/* Right Sidebar - Properties Panel */}
+        <div style={{
+          width: '320px',
+          background: '#ffffff',
+          borderRadius: '20px',
+          height: 'fit-content'
+        }}>
+          {renderPropertiesPanel()}
+        </div>
+      </div>
     </div>
   );
 };
