@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Button, Input, Select, Card, Space, Slider, ColorPicker } from '@arco-design/web-react';
+import { Button, Input, Card, Space, Slider, ColorPicker } from '@arco-design/web-react';
 import { IconPlus, IconDelete, IconImage, IconMinus, IconPlayCircle, IconSound, IconFile, IconExpand } from '@arco-design/web-react/icon';
 import { Element, Page } from '../../components/ElementTypes';
 import { ElementRenderer } from '../../components/ElementRenderer';
@@ -246,12 +246,18 @@ const FlipbookEditor: React.FC = () => {
 
   const addNewPage = useCallback(() => {
     const newPage: Page = {
-      id: `${pages.length + 1}`,
+      id: `page-${Date.now()}`,
       elements: []
     };
     setPages(prev => [...prev, newPage]);
     setCurrentPage(pages.length);
   }, [pages.length]);
+
+  const getPageDisplayName = (index: number) => {
+    if (index === 0) return 'Cover';
+    if (index === pages.length - 1 && pages.length > 1) return 'Closing';
+    return `${index + 1}`;
+  };
 
   const selectedEl = pages[currentPage]?.elements.find(el => el.id === selectedElement);
 
@@ -392,25 +398,47 @@ const FlipbookEditor: React.FC = () => {
   return (
     <div className="flipbook-editor-container">
       <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Space wrap>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, minWidth: 0 }}>
           <Button onClick={addNewPage}>
             <IconPlus /> Add Page
           </Button>
-          <Select
-            value={currentPage.toString()}
-            onChange={(value) => setCurrentPage(parseInt(value))}
-            style={{ width: '120px' }}
-          >
+          
+          {/* Horizontal Page Navigation */}
+          <div className="page-nav-scroll" style={{ 
+            display: 'flex', 
+            gap: '8px',
+            alignItems: 'center',
+            background: '#f8f9fa',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            border: '1px solid #e9ecef',
+            overflowX: 'auto',
+            maxWidth: '700px'
+          }}>
             {pages.map((page, index) => (
-              <Select.Option key={page.id} value={index.toString()}>
-                Page {index + 1}
-              </Select.Option>
+              <Button
+                key={page.id}
+                type={currentPage === index ? 'primary' : 'outline'}
+                size="small"
+                onClick={() => setCurrentPage(index)}
+                style={{
+                  minWidth: '60px',
+                  height: '32px',
+                  fontSize: '12px',
+                  fontWeight: currentPage === index ? '600' : '400',
+                  flexShrink: 0
+                }}
+              >
+                {getPageDisplayName(index)}
+              </Button>
             ))}
-          </Select>
-        </Space>
+          </div>
+        </div>
+        
         <Button
           type="outline"
           onClick={onPreviewFlipbook}
+          style={{ flexShrink: 0 }}
         >
           View
         </Button>
@@ -496,7 +524,12 @@ const FlipbookEditor: React.FC = () => {
         </div>
 
         {/* Center - Editor Canvas */}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+        <div style={{ 
+          flex: 1, 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'flex-start'
+        }}>
           <div
             className="flipbook-canvas"
             onMouseMove={handleMouseMove}
