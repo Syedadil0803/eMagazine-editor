@@ -1,5 +1,5 @@
 {
-  "name": "flipbook-editor",
+  "name": "emagazine-editor",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "Mohammed Adil Syed",
   "license": "ISC",
-  "description": "Custom flipbook editor application",
+  "description": "Custom emagazine editor application",
   "dependencies": {
     "@arco-design/web-react": "^2.36.1",
     "easy-email-core": "^4.16.5",

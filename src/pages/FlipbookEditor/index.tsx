@@ -77,7 +77,7 @@ const FlipbookEditor: React.FC = () => {
     const html = generateFlipBookHtml({
       pages: magazinePages,
       currentPageIndex: currentPage,
-      templateSubject: 'Flipbook Preview'
+      templateSubject: 'eMagazine Preview'
     });
 
     const win = window.open("", "_blank");
