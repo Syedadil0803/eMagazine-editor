@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Button, Input, Card, Space, Slider, ColorPicker } from '@arco-design/web-react';
+import { Button, Input, Card, Space, Slider, ColorPicker, Select, Collapse } from '@arco-design/web-react';
 import { IconPlus, IconDelete, IconImage, IconMinus, IconPlayCircle, IconSound, IconFile, IconExpand } from '@arco-design/web-react/icon';
 import { Element, Page } from '../../components/ElementTypes';
 import { ElementRenderer } from '../../components/ElementRenderer';
@@ -36,7 +36,31 @@ const FlipbookEditor: React.FC = () => {
             color: (element as any).color,
             src: (element as any).src,
             alt: (element as any).alt,
-            content: (element as any).content
+            content: (element as any).content,
+            // Add new properties
+            fontFamily: (element as any).fontFamily,
+            fontWeight: (element as any).fontWeight,
+            fontStyle: (element as any).fontStyle,
+            textDecoration: (element as any).textDecoration,
+            textTransform: (element as any).textTransform,
+            textAlign: (element as any).textAlign,
+            lineHeight: (element as any).lineHeight,
+            letterSpacing: (element as any).letterSpacing,
+            wordSpacing: (element as any).wordSpacing,
+            textIndent: (element as any).textIndent,
+            whiteSpace: (element as any).whiteSpace,
+            writingMode: (element as any).writingMode,
+            direction: (element as any).direction,
+            opacity: (element as any).opacity,
+            textShadow: (element as any).textShadow,
+            backgroundColor: (element as any).backgroundColor,
+            padding: (element as any).padding,
+            border: (element as any).border,
+            borderRadius: (element as any).borderRadius,
+            overflow: (element as any).overflow,
+            objectFit: (element as any).objectFit, // For images/videos
+            poster: (element as any).poster, // For videos
+            textColor: (element as any).textColor // For buttons
           },
           children: [(element as any).content || '']
         }))
@@ -78,7 +102,23 @@ const FlipbookEditor: React.FC = () => {
           fontWeight: 'normal',
           fontFamily: 'Arial',
           textAlign: 'left',
-          lineHeight: 1.4
+          lineHeight: 1.4,
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          textTransform: 'none',
+          letterSpacing: 0,
+          wordSpacing: 0,
+          textIndent: 0,
+          opacity: 1,
+          textShadow: 'none',
+          backgroundColor: 'transparent',
+          padding: 4,
+          borderRadius: 0,
+          border: 'none',
+          writingMode: 'horizontal-tb',
+          direction: 'ltr',
+          whiteSpace: 'pre-wrap',
+          overflow: 'hidden'
         };
         break;
       case 'image':
@@ -283,57 +323,342 @@ const FlipbookEditor: React.FC = () => {
       >
         <Space direction="vertical" style={{ width: '100%' }}>
           {/* Common properties */}
-          <div>
-            <label>X Position:</label>
-            <Input
-              value={selectedEl.x.toString()}
-              onChange={(value) => updateElement(selectedEl.id, { x: parseInt(value) || 0 })}
-              style={{ marginTop: '8px' }}
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '8px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>X Position</label>
+              <Input
+                value={selectedEl.x.toString()}
+                onChange={(value) => updateElement(selectedEl.id, { x: parseInt(value) || 0 })}
+                suffix="px"
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Y Position</label>
+              <Input
+                value={selectedEl.y.toString()}
+                onChange={(value) => updateElement(selectedEl.id, { y: parseInt(value) || 0 })}
+                suffix="px"
+              />
+            </div>
           </div>
 
-          <div>
-            <label>Y Position:</label>
-            <Input
-              value={selectedEl.y.toString()}
-              onChange={(value) => updateElement(selectedEl.id, { y: parseInt(value) || 0 })}
-              style={{ marginTop: '8px' }}
-            />
-          </div>
           {selectedEl.type === 'text' && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Content</label>
-              <Input
-                value={(selectedEl as any).content || ''}
-                onChange={(value) => updateElement(selectedEl.id, { content: value })}
-                placeholder="Enter text content..."
-              />
-            </div>
-          )}
-          {(selectedEl as any).fontSize && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Font Size</label>
-              <Slider
-                value={(selectedEl as any).fontSize || 16}
-                onChange={(value) => updateElement(selectedEl.id, { fontSize: value as number })}
-                min={8}
-                max={72}
-              />
-            </div>
-          )}
-          {(selectedEl as any).color && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Color</label>
-              <ColorPicker
-                value={(selectedEl as any).color || '#000000'}
-                onChange={(value) => {
-                  const colorValue = typeof value === 'string' ? value :
-                    (value && typeof value === 'object' && 'color' in value) ? (value as any).color :
-                      '#000000';
-                  updateElement(selectedEl.id, { color: colorValue });
-                }}
-              />
-            </div>
+            <>
+              {/* Content Section - Always Visible */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 600 }}>Content</label>
+                <Input.TextArea
+                  value={(selectedEl as any).content || ''}
+                  onChange={(value) => updateElement(selectedEl.id, { content: value })}
+                  placeholder="Enter text content..."
+                  rows={3}
+                />
+              </div>
+
+              <Collapse defaultActiveKey={['1']} style={{ border: 'none', background: 'transparent' }}>
+                <Collapse.Item header="Typography" name="1" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Font Family</label>
+                      <Select
+                        value={(selectedEl as any).fontFamily || 'Arial'}
+                        onChange={(value) => updateElement(selectedEl.id, { fontFamily: value })}
+                        style={{ width: '100%' }}
+                      >
+                        <Select.Option value="Arial">Arial</Select.Option>
+                        <Select.Option value="Helvetica">Helvetica</Select.Option>
+                        <Select.Option value="Times New Roman">Times New Roman</Select.Option>
+                        <Select.Option value="Georgia">Georgia</Select.Option>
+                        <Select.Option value="Courier New">Courier New</Select.Option>
+                        <Select.Option value="Verdana">Verdana</Select.Option>
+                        <Select.Option value="Impact">Impact</Select.Option>
+                        <Select.Option value="Comic Sans MS">Comic Sans MS</Select.Option>
+                        <Select.Option value="Trebuchet MS">Trebuchet MS</Select.Option>
+                        <Select.Option value="Palatino">Palatino</Select.Option>
+                        <Select.Option value="Garamond">Garamond</Select.Option>
+                        <Select.Option value="Bookman">Bookman</Select.Option>
+                        <Select.Option value="Tahoma">Tahoma</Select.Option>
+                      </Select>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Font Size</label>
+                        <div style={{ display: 'flex', alignItems: 'center', height: '32px' }}>
+                          <Slider
+                            value={(selectedEl as any).fontSize || 16}
+                            onChange={(value) => updateElement(selectedEl.id, { fontSize: value as number })}
+                            min={8}
+                            max={72}
+                            style={{ flex: 1, marginRight: '8px' }}
+                          />
+                          <span style={{ fontSize: '12px', width: '24px' }}>{(selectedEl as any).fontSize}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Weight</label>
+                        <Select
+                          value={(selectedEl as any).fontWeight || 'normal'}
+                          onChange={(value) => updateElement(selectedEl.id, { fontWeight: value })}
+                        >
+                          <Select.Option value="100">Thin</Select.Option>
+                          <Select.Option value="300">Light</Select.Option>
+                          <Select.Option value="normal">Normal</Select.Option>
+                          <Select.Option value="500">Medium</Select.Option>
+                          <Select.Option value="600">SemiBold</Select.Option>
+                          <Select.Option value="bold">Bold</Select.Option>
+                          <Select.Option value="800">ExtraBold</Select.Option>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Style</label>
+                        <Select
+                          value={(selectedEl as any).fontStyle || 'normal'}
+                          onChange={(value) => updateElement(selectedEl.id, { fontStyle: value })}
+                        >
+                          <Select.Option value="normal">Normal</Select.Option>
+                          <Select.Option value="italic">Italic</Select.Option>
+                          <Select.Option value="oblique">Oblique</Select.Option>
+                        </Select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Decoration</label>
+                        <Select
+                          value={(selectedEl as any).textDecoration || 'none'}
+                          onChange={(value) => updateElement(selectedEl.id, { textDecoration: value })}
+                        >
+                          <Select.Option value="none">None</Select.Option>
+                          <Select.Option value="underline">Underline</Select.Option>
+                          <Select.Option value="overline">Overline</Select.Option>
+                          <Select.Option value="line-through">Strike</Select.Option>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Transform</label>
+                        <Select
+                          value={(selectedEl as any).textTransform || 'none'}
+                          onChange={(value) => updateElement(selectedEl.id, { textTransform: value })}
+                        >
+                          <Select.Option value="none">None</Select.Option>
+                          <Select.Option value="uppercase">UPPER</Select.Option>
+                          <Select.Option value="lowercase">lower</Select.Option>
+                          <Select.Option value="capitalize">Capital</Select.Option>
+                        </Select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Color</label>
+                        <ColorPicker
+                          value={(selectedEl as any).color || '#000000'}
+                          onChange={(value) => {
+                            const colorValue = typeof value === 'string' ? value :
+                              (value && typeof value === 'object' && 'color' in value) ? (value as any).color :
+                                '#000000';
+                            updateElement(selectedEl.id, { color: colorValue });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </Space>
+                </Collapse.Item>
+
+                <Collapse.Item header="Paragraph & Formatting" name="2" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Text Align</label>
+                      <Select
+                        value={(selectedEl as any).textAlign || 'left'}
+                        onChange={(value) => updateElement(selectedEl.id, { textAlign: value })}
+                      >
+                        <Select.Option value="left">Left</Select.Option>
+                        <Select.Option value="center">Center</Select.Option>
+                        <Select.Option value="right">Right</Select.Option>
+                        <Select.Option value="justify">Justify</Select.Option>
+                      </Select>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Line Height: {(selectedEl as any).lineHeight || 1.4}</label>
+                        <Slider
+                          value={(selectedEl as any).lineHeight || 1.4}
+                          onChange={(value) => updateElement(selectedEl.id, { lineHeight: value as number })}
+                          min={0.8}
+                          max={3}
+                          step={0.1}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Indent: {(selectedEl as any).textIndent || 0}px</label>
+                        <Slider
+                          value={(selectedEl as any).textIndent || 0}
+                          onChange={(value) => updateElement(selectedEl.id, { textIndent: value as number })}
+                          min={0}
+                          max={100}
+                          step={5}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Char Space: {(selectedEl as any).letterSpacing || 0}px</label>
+                        <Slider
+                          value={(selectedEl as any).letterSpacing || 0}
+                          onChange={(value) => updateElement(selectedEl.id, { letterSpacing: value as number })}
+                          min={-5}
+                          max={20}
+                          step={0.5}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Word Space: {(selectedEl as any).wordSpacing || 0}px</label>
+                        <Slider
+                          value={(selectedEl as any).wordSpacing || 0}
+                          onChange={(value) => updateElement(selectedEl.id, { wordSpacing: value as number })}
+                          min={-10}
+                          max={50}
+                          step={1}
+                        />
+                      </div>
+                    </div>
+                  </Space>
+                </Collapse.Item>
+
+                <Collapse.Item header="Appearance & Box Model" name="3" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Background</label>
+                        <ColorPicker
+                          value={(selectedEl as any).backgroundColor || 'transparent'}
+                          onChange={(value) => {
+                            const colorValue = typeof value === 'string' ? value :
+                              (value && typeof value === 'object' && 'color' in value) ? (value as any).color :
+                                'transparent';
+                            updateElement(selectedEl.id, { backgroundColor: colorValue });
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Opacity: {(selectedEl as any).opacity || 1}</label>
+                        <Slider
+                          value={(selectedEl as any).opacity || 1}
+                          onChange={(value) => updateElement(selectedEl.id, { opacity: value as number })}
+                          min={0}
+                          max={1}
+                          step={0.1}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Padding: {(selectedEl as any).padding || 4}px</label>
+                        <Slider
+                          value={(selectedEl as any).padding || 4}
+                          onChange={(value) => updateElement(selectedEl.id, { padding: value as number })}
+                          min={0}
+                          max={50}
+                          step={1}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Radius: {(selectedEl as any).borderRadius || 0}px</label>
+                        <Slider
+                          value={(selectedEl as any).borderRadius || 0}
+                          onChange={(value) => updateElement(selectedEl.id, { borderRadius: value as number })}
+                          min={0}
+                          max={50}
+                          step={1}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Border</label>
+                        <Input
+                          value={(selectedEl as any).border || ''}
+                          onChange={(value) => updateElement(selectedEl.id, { border: value })}
+                          placeholder="e.g. 1px solid #ccc"
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Shadow</label>
+                        <Input
+                          value={(selectedEl as any).textShadow || ''}
+                          onChange={(value) => updateElement(selectedEl.id, { textShadow: value })}
+                          placeholder="2px 2px 4px #ccc"
+                        />
+                      </div>
+                    </div>
+                  </Space>
+                </Collapse.Item>
+
+                <Collapse.Item header="Advanced Layout" name="4" style={{ borderBottom: 'none' }}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Writing Mode</label>
+                        <Select
+                          value={(selectedEl as any).writingMode || 'horizontal-tb'}
+                          onChange={(value) => updateElement(selectedEl.id, { writingMode: value })}
+                        >
+                          <Select.Option value="horizontal-tb">Horizontal</Select.Option>
+                          <Select.Option value="vertical-rl">Vertical (R-L)</Select.Option>
+                          <Select.Option value="vertical-lr">Vertical (L-R)</Select.Option>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Direction</label>
+                        <Select
+                          value={(selectedEl as any).direction || 'ltr'}
+                          onChange={(value) => updateElement(selectedEl.id, { direction: value })}
+                        >
+                          <Select.Option value="ltr">LTR</Select.Option>
+                          <Select.Option value="rtl">RTL</Select.Option>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>White Space</label>
+                        <Select
+                          value={(selectedEl as any).whiteSpace || 'pre-wrap'}
+                          onChange={(value) => updateElement(selectedEl.id, { whiteSpace: value })}
+                        >
+                          <Select.Option value="normal">Normal</Select.Option>
+                          <Select.Option value="nowrap">No Wrap</Select.Option>
+                          <Select.Option value="pre">Pre</Select.Option>
+                          <Select.Option value="pre-wrap">Pre Wrap</Select.Option>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Overflow</label>
+                        <Select
+                          value={(selectedEl as any).overflow || 'hidden'}
+                          onChange={(value) => updateElement(selectedEl.id, { overflow: value })}
+                        >
+                          <Select.Option value="visible">Visible</Select.Option>
+                          <Select.Option value="hidden">Hidden</Select.Option>
+                          <Select.Option value="scroll">Scroll</Select.Option>
+                          <Select.Option value="auto">Auto</Select.Option>
+                        </Select>
+                      </div>
+                    </div>
+                  </Space>
+                </Collapse.Item>
+              </Collapse>
+            </>
           )}
 
           {/* Video specific properties */}

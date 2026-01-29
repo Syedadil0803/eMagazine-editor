@@ -9,8 +9,24 @@ export interface TextElement {
   color: string;
   fontWeight: string;
   fontFamily: string;
-  textAlign: 'left' | 'center' | 'right';
+  textAlign: 'left' | 'center' | 'right' | 'justify';
   lineHeight: number;
+  fontStyle: 'normal' | 'italic' | 'oblique';
+  textDecoration: 'none' | 'underline' | 'overline' | 'line-through';
+  textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  letterSpacing: number;
+  wordSpacing: number;
+  textIndent: number;
+  opacity: number;
+  textShadow: string;
+  backgroundColor: string;
+  padding: number;
+  borderRadius: number;
+  border: string;
+  writingMode: 'horizontal-tb' | 'vertical-rl' | 'vertical-lr';
+  direction: 'ltr' | 'rtl';
+  whiteSpace: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line';
+  overflow: 'visible' | 'hidden' | 'scroll' | 'auto';
 }
 
 export interface ImageElement {

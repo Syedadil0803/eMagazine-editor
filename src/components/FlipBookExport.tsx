@@ -24,14 +24,14 @@ export const generateFlipBookHtml = ({
   // Calculate scale factor for flipbook display dynamically
   // This will be calculated based on the actual flipbook dimensions
   let scaleFactor = 0.6; // Default fallback
-  
+
   // We'll calculate the actual scale factor in the JavaScript initialization
   // and store it globally for the HTML generation to use
 
   // Direct HTML rendering for flipbook elements with scaling
   const renderFlipbookElements = (pageContent: any): string => {
     if (!pageContent) return '';
-    
+
     // Handle both MJML-like structure and direct element array
     let elements = [];
     if (pageContent.children && Array.isArray(pageContent.children)) {
@@ -43,7 +43,7 @@ export const generateFlipBookHtml = ({
     } else {
       return '';
     }
-    
+
     return elements.map((element: any) => {
       // Handle both MJML-like structure and direct element
       let elementData = element;
@@ -54,41 +54,73 @@ export const generateFlipBookHtml = ({
           ...element.attributes
         };
       }
-      
+
       // Apply scaling to all coordinates and sizes
       const scaledX = Math.round((elementData.x || 0) * scaleFactor);
       const scaledY = Math.round((elementData.y || 0) * scaleFactor);
       const scaledWidth = Math.round((elementData.width || 200) * scaleFactor);
       const scaledHeight = Math.round((elementData.height || 150) * scaleFactor);
       const scaledFontSize = Math.round((elementData.fontSize || 16) * scaleFactor);
-      
+
       switch (elementData.type) {
         case 'text':
           // Show empty text boxes with a subtle border instead of hiding them
           const isEmpty = !elementData.content || elementData.content.trim() === '';
-          const borderStyle = isEmpty ? '1px dashed #ccc' : 'none';
-          const bgColor = isEmpty ? '#f9f9f9' : 'transparent';
+          const effectiveBorder = elementData.border || (isEmpty ? '1px dashed #ccc' : 'none');
+          const effectiveBg = elementData.backgroundColor || (isEmpty ? '#f9f9f9' : 'transparent');
           const content = elementData.content || (isEmpty ? '<span style="color: #999;">Empty text</span>' : '');
-          return `<div style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; font-size: ${scaledFontSize}px; color: ${elementData.color || '#000'}; font-family: ${elementData.fontFamily || 'Arial, sans-serif'}; font-weight: ${elementData.fontWeight || 'normal'}; text-align: ${elementData.textAlign || 'left'}; line-height: ${elementData.lineHeight || 1.5}; white-space: pre-wrap; border: ${borderStyle}; background-color: ${bgColor}; min-height: 20px; z-index: 10;">${content}</div>`;
-        
+
+          return `<div style="
+            position: absolute;
+            left: ${scaledX}px;
+            top: ${scaledY}px;
+            width: ${scaledWidth}px;
+            height: ${scaledHeight}px;
+            font-size: ${scaledFontSize}px;
+            color: ${elementData.color || '#000'};
+            font-family: ${elementData.fontFamily || 'Arial, sans-serif'};
+            font-weight: ${elementData.fontWeight || 'normal'};
+            font-style: ${elementData.fontStyle || 'normal'};
+            text-decoration: ${elementData.textDecoration || 'none'};
+            text-transform: ${elementData.textTransform || 'none'};
+            letter-spacing: ${elementData.letterSpacing || 0}px;
+            word-spacing: ${elementData.wordSpacing || 0}px;
+            text-indent: ${elementData.textIndent || 0}px;
+            line-height: ${elementData.lineHeight || 1.5};
+            text-align: ${elementData.textAlign || 'left'};
+            opacity: ${elementData.opacity !== undefined ? elementData.opacity : 1};
+            text-shadow: ${elementData.textShadow || 'none'};
+            white-space: ${elementData.whiteSpace || 'pre-wrap'};
+            overflow: ${elementData.overflow || 'hidden'};
+            writing-mode: ${elementData.writingMode || 'horizontal-tb'};
+            direction: ${elementData.direction || 'ltr'};
+            background-color: ${effectiveBg};
+            padding: ${elementData.padding || 0}px;
+            border: ${effectiveBorder};
+            border-radius: ${elementData.borderRadius || 0}px;
+            min-height: 20px;
+            z-index: 10;
+            box-sizing: border-box;
+          ">${content}</div>`;
+
         case 'image':
           return `<img src="${elementData.src || 'https://via.placeholder.com/200x150'}" alt="${elementData.alt || 'Image'}" style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; border-radius: ${elementData.borderRadius || 0}px; object-fit: ${elementData.objectFit || 'cover'}; z-index: 10;" />`;
-        
+
         case 'button':
           return `<button style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; background: ${elementData.backgroundColor || '#1890ff'}; color: ${elementData.textColor || 'white'}; font-size: ${elementData.fontSize || 14}px; font-weight: ${elementData.fontWeight || 'normal'}; border: none; border-radius: ${elementData.borderRadius || 4}px; padding: ${elementData.padding || 10}px; z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center;">${elementData.text || 'Button'}</button>`;
-        
+
         case 'divider':
           return `<hr style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; border: none; border-bottom: 1px ${elementData.style || 'solid'} ${elementData.color || '#ddd'}; z-index: 10;" />`;
-        
+
         case 'video':
           return `<video src="${elementData.src || ''}" poster="${elementData.poster || ''}" controls playsinline style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; object-fit: cover; z-index: 10;">Your browser does not support the video tag.</video>`;
-        
+
         case 'audio':
           return `<audio src="${elementData.src || ''}" controls style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; z-index: 10;">Your browser does not support the audio tag.</audio>`;
-        
+
         case 'spacer':
           return `<div style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; z-index: 10;"></div>`;
-        
+
         default:
           return '';
       }
@@ -719,6 +751,22 @@ ${slides}
                         });
                         scaledStyle = scaledStyle.replace(/font-size:\s*(\d+)px/g, function(match, value) {
                             return 'font-size: ' + Math.round(parseInt(value) * actualScaleFactor) + 'px';
+                        });
+                        // Add scaling for new properties
+                        scaledStyle = scaledStyle.replace(/letter-spacing:\s*(-?[\d.]+)px/g, function(match, value) {
+                            return 'letter-spacing: ' + (parseFloat(value) * actualScaleFactor) + 'px';
+                        });
+                        scaledStyle = scaledStyle.replace(/word-spacing:\s*(-?[\d.]+)px/g, function(match, value) {
+                            return 'word-spacing: ' + (parseFloat(value) * actualScaleFactor) + 'px';
+                        });
+                        scaledStyle = scaledStyle.replace(/text-indent:\s*(-?[\d.]+)px/g, function(match, value) {
+                            return 'text-indent: ' + (parseFloat(value) * actualScaleFactor) + 'px';
+                        });
+                        scaledStyle = scaledStyle.replace(/padding:\s*(\d+)px/g, function(match, value) {
+                            return 'padding: ' + Math.round(parseInt(value) * actualScaleFactor) + 'px';
+                        });
+                        scaledStyle = scaledStyle.replace(/border-radius:\s*(\d+)px/g, function(match, value) {
+                            return 'border-radius: ' + Math.round(parseInt(value) * actualScaleFactor) + 'px';
                         });
                         element.setAttribute('style', scaledStyle);
                     }

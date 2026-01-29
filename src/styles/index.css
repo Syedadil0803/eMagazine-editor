@@ -34,17 +34,6 @@ body {
   overflow: visible;
 }
 
-.flipbook-element {
-  position: absolute;
-  cursor: move;
-  padding: 4px;
-  border: 1px dashed #ccc;
-}
-
-.flipbook-element.selected {
-  border: 2px solid #1890ff;
-  background-color: #f0f8ff;
-}
 
 .flipbook-page-number {
   position: absolute;

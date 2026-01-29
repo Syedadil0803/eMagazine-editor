@@ -28,9 +28,6 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
     width: `${element.width}px`,
     height: (element as any).height ? `${(element as any).height}px` : 'auto',
     cursor: isResizing ? 'grabbing' : 'move',
-    border: isSelected ? '2px solid #1890ff' : '1px dashed #ccc',
-    padding: '4px',
-    backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
     transition: isResizing ? 'none' : 'all 0.2s ease'
   };
 
@@ -182,10 +179,25 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               fontFamily: textEl.fontFamily,
               textAlign: textEl.textAlign,
               lineHeight: textEl.lineHeight,
-              whiteSpace: 'pre-wrap',
+              fontStyle: textEl.fontStyle || 'normal',
+              textDecoration: textEl.textDecoration || 'none',
+              textTransform: textEl.textTransform || 'none',
+              letterSpacing: `${textEl.letterSpacing || 0}px`,
+              wordSpacing: `${textEl.wordSpacing || 0}px`,
+              textIndent: `${textEl.textIndent || 0}px`,
+              opacity: textEl.opacity || 1,
+              textShadow: textEl.textShadow || 'none',
+              backgroundColor: isSelected ? '#f0f8ff' : (textEl.backgroundColor || 'transparent'),
+              padding: `${textEl.padding || 4}px`,
+              borderRadius: `${textEl.borderRadius || 0}px`,
+              border: isSelected ? '2px solid #1890ff' : (textEl.border || 'none'),
+              writingMode: textEl.writingMode || 'horizontal-tb',
+              direction: textEl.direction || 'ltr',
+              whiteSpace: textEl.whiteSpace || 'pre-wrap',
+              overflow: textEl.overflow || 'hidden',
               minHeight: '30px',
-              overflow: 'hidden',
-              wordWrap: 'break-word'
+              wordWrap: 'break-word',
+              cursor: isResizing ? 'grabbing' : 'move'
             }}
             onMouseDown={handleMouseDown}
           >
@@ -204,6 +216,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               padding: 0,
               overflow: 'hidden',
               borderRadius: `${imgEl.borderRadius}px`,
+              border: isSelected ? '2px solid #1890ff' : '1px dashed #ccc',
+              backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
               cursor: isSelected ? 'move' : 'pointer'
             }}
             onMouseDown={handleMouseDown}
@@ -233,6 +247,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               ...baseStyle,
               padding: 0,
               backgroundColor: '#000',
+              border: isSelected ? '2px solid #1890ff' : '1px dashed #ccc',
               cursor: isSelected ? 'move' : 'pointer'
             }}
             onMouseDown={handleMouseDown}
@@ -262,6 +277,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
             ref={elementRef}
             style={{
               ...baseStyle,
+              border: isSelected ? '2px solid #1890ff' : '1px dashed #ccc',
+              backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
               cursor: isSelected ? 'move' : 'pointer'
             }}
             onMouseDown={handleMouseDown}
@@ -316,8 +333,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               ...baseStyle,
               height: `${divEl.height}px`,
               backgroundColor: divEl.color,
-              border: 'none',
-              borderBottom: `1px ${divEl.style} ${divEl.color}`,
+              border: isSelected ? '2px solid #1890ff' : `1px ${divEl.style} ${divEl.color}`,
               padding: 0,
               display: 'flex',
               alignItems: 'center',
@@ -341,8 +357,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
             ref={elementRef}
             style={{
               ...baseStyle,
-              border: '1px dashed #ccc',
-              backgroundColor: '#f0f0f0',
+              border: isSelected ? '2px solid #1890ff' : '1px dashed #ccc',
+              backgroundColor: isSelected ? '#f0f8ff' : '#f0f0f0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
