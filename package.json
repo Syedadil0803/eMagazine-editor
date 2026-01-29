@@ -1,0 +1,30 @@
+{
+  "name": "flipbook-editor",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Custom flipbook editor application",
+  "dependencies": {
+    "@arco-design/web-react": "^2.36.1",
+    "easy-email-core": "^4.16.5",
+    "easy-email-editor": "^4.16.3",
+    "mjml-browser": "^4.18.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react-refresh": "^1.3.6",
+    "typescript": "^4.9.4",
+    "vite": "^4.1.4"
+  }
+}
