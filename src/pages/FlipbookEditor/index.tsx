@@ -391,7 +391,7 @@ const FlipbookEditor: React.FC = () => {
 
   return (
     <div className="flipbook-editor-container">
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Space wrap>
           <Button onClick={addNewPage}>
             <IconPlus /> Add Page
@@ -407,14 +407,13 @@ const FlipbookEditor: React.FC = () => {
               </Select.Option>
             ))}
           </Select>
-          <Button
-            type="outline"
-            onClick={onPreviewFlipbook}
-            style={{ marginLeft: '20px' }}
-          >
-            📖 View Flipbook
-          </Button>
         </Space>
+        <Button
+          type="outline"
+          onClick={onPreviewFlipbook}
+        >
+          View
+        </Button>
       </div>
 
       {/* Main Editor Layout */}
