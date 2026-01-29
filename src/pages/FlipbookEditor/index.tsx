@@ -418,7 +418,7 @@ const FlipbookEditor: React.FC = () => {
       </div>
 
       {/* Main Editor Layout */}
-      <div style={{ display: 'flex', gap: '20px', height: 'calc(100vh - 120px)' }}>
+      <div style={{ display: 'flex', gap: '20px', minHeight: 'calc(100vh - 120px)', paddingBottom: '10px' }}>
         {/* Left Sidebar - Element Selection */}
         {/* Left Sidebar - Element Selection */}
         <div style={{
