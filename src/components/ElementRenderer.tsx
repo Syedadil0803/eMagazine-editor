@@ -215,7 +215,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: imgEl.objectFit,
+                objectFit: imgEl.objectFit || 'contain',
                 display: 'block',
                 pointerEvents: 'none'
               }}
@@ -247,7 +247,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 pointerEvents: 'none'
               }}
             />

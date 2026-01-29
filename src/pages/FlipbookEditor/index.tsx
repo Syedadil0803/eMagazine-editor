@@ -92,7 +92,7 @@ const FlipbookEditor: React.FC = () => {
           width: 300,
           height: 200,
           borderRadius: 0,
-          objectFit: 'cover'
+          objectFit: 'contain'
         };
         break;
       case 'video':
@@ -198,14 +198,14 @@ const FlipbookEditor: React.FC = () => {
 
     setPages(prev => {
       const newPages = [...prev];
-      
+
       // Check for duplicate IDs in current page and remove the old one if found
       const existingIds = newPages[currentPage].elements.map(el => el.id);
       if (existingIds.includes(newElement.id)) {
         // Remove the old element with the same ID
         newPages[currentPage].elements = newPages[currentPage].elements.filter(el => el.id !== newElement.id);
       }
-      
+
       newPages[currentPage].elements.push(newElement);
       return newPages;
     });
@@ -327,9 +327,9 @@ const FlipbookEditor: React.FC = () => {
               <ColorPicker
                 value={(selectedEl as any).color || '#000000'}
                 onChange={(value) => {
-                  const colorValue = typeof value === 'string' ? value : 
-                                    (value && typeof value === 'object' && 'color' in value) ? (value as any).color : 
-                                    '#000000';
+                  const colorValue = typeof value === 'string' ? value :
+                    (value && typeof value === 'object' && 'color' in value) ? (value as any).color :
+                      '#000000';
                   updateElement(selectedEl.id, { color: colorValue });
                 }}
               />
@@ -414,10 +414,10 @@ const FlipbookEditor: React.FC = () => {
           <Button onClick={addNewPage}>
             <IconPlus /> Add Page
           </Button>
-          
+
           {/* Horizontal Page Navigation */}
-          <div className="page-nav-scroll" style={{ 
-            display: 'flex', 
+          <div className="page-nav-scroll" style={{
+            display: 'flex',
             gap: '8px',
             alignItems: 'center',
             background: '#f8f9fa',
@@ -446,7 +446,7 @@ const FlipbookEditor: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         <Button
           type="outline"
           onClick={onPreviewFlipbook}
@@ -536,10 +536,10 @@ const FlipbookEditor: React.FC = () => {
         </div>
 
         {/* Center - Editor Canvas */}
-        <div style={{ 
-          flex: 1, 
-          display: 'flex', 
-          justifyContent: 'center', 
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
           alignItems: 'flex-start'
         }}>
           <div
