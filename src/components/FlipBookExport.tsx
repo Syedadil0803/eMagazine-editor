@@ -16,15 +16,10 @@ interface FlipBookExportProps {
 export const generateFlipBookHtml = ({
   pages,
   currentPageIndex,
-  currentValues,
   templateSubject
-}: FlipBookExportProps): string => {
-  // Update current page content first
+}: Omit<FlipBookExportProps, 'currentValues'>): string => {
+  // Use pages as-is since convertToMagazinePages already provides the correct content
   const allPages = [...pages];
-  allPages[currentPageIndex] = {
-    ...allPages[currentPageIndex],
-    content: currentValues.content,
-  };
 
   // Calculate scale factor for flipbook display dynamically
   // This will be calculated based on the actual flipbook dimensions
@@ -69,7 +64,12 @@ export const generateFlipBookHtml = ({
       
       switch (elementData.type) {
         case 'text':
-          return `<div style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; font-size: ${scaledFontSize}px; color: ${elementData.color || '#000'}; font-family: ${elementData.fontFamily || 'Arial, sans-serif'}; font-weight: ${elementData.fontWeight || 'normal'}; text-align: ${elementData.textAlign || 'left'}; line-height: ${elementData.lineHeight || 1.5}; white-space: pre-wrap; z-index: 10;">${elementData.content || 'Text'}</div>`;
+          // Show empty text boxes with a subtle border instead of hiding them
+          const isEmpty = !elementData.content || elementData.content.trim() === '';
+          const borderStyle = isEmpty ? '1px dashed #ccc' : 'none';
+          const bgColor = isEmpty ? '#f9f9f9' : 'transparent';
+          const content = elementData.content || (isEmpty ? '<span style="color: #999;">Empty text</span>' : '');
+          return `<div style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; font-size: ${scaledFontSize}px; color: ${elementData.color || '#000'}; font-family: ${elementData.fontFamily || 'Arial, sans-serif'}; font-weight: ${elementData.fontWeight || 'normal'}; text-align: ${elementData.textAlign || 'left'}; line-height: ${elementData.lineHeight || 1.5}; white-space: pre-wrap; border: ${borderStyle}; background-color: ${bgColor}; min-height: 20px; z-index: 10;">${content}</div>`;
         
         case 'image':
           return `<img src="${elementData.src || 'https://via.placeholder.com/200x150'}" alt="${elementData.alt || 'Image'}" style="position: absolute; left: ${scaledX}px; top: ${scaledY}px; width: ${scaledWidth}px; height: ${scaledHeight}px; border-radius: ${elementData.borderRadius || 0}px; object-fit: ${elementData.objectFit || 'cover'}; z-index: 10;" />`;

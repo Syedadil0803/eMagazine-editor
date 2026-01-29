@@ -13,6 +13,8 @@ export const FlipbookPreview: React.FC<FlipbookPreviewProps> = ({ pages, current
     switch (element.type) {
       case 'text':
         const textEl = element as any;
+        // Show empty text boxes with a subtle border instead of hiding them
+        const isEmpty = !textEl.content || textEl.content.trim() === '';
         return (
           <div
             style={{
@@ -26,10 +28,13 @@ export const FlipbookPreview: React.FC<FlipbookPreviewProps> = ({ pages, current
               fontFamily: textEl.fontFamily,
               textAlign: textEl.textAlign,
               lineHeight: textEl.lineHeight,
-              whiteSpace: 'pre-wrap'
+              whiteSpace: 'pre-wrap',
+              border: isEmpty ? '1px dashed #ccc' : 'none',
+              backgroundColor: isEmpty ? '#f9f9f9' : 'transparent',
+              minHeight: '20px'
             }}
           >
-            {textEl.content}
+            {textEl.content || (isEmpty && <span style={{ color: '#999' }}>Empty text</span>)}
           </div>
         );
 
@@ -207,7 +212,6 @@ export const FlipbookPreview: React.FC<FlipbookPreviewProps> = ({ pages, current
         return <div style={shapeStyle} />;
 
       case 'spacer':
-        const spacerEl = element as any;
         return (
           <div
             style={{

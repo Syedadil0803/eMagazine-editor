@@ -17,7 +17,6 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
   onMouseDown
 }) => {
   const [isResizing, setIsResizing] = useState(false);
-  const [resizeDirection, setResizeDirection] = useState('');
   const elementRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 });
 
@@ -28,11 +27,11 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
     top: `${element.y}px`,
     width: `${element.width}px`,
     height: (element as any).height ? `${(element as any).height}px` : 'auto',
-    cursor: 'move',
+    cursor: isResizing ? 'grabbing' : 'move',
     border: isSelected ? '2px solid #1890ff' : '1px dashed #ccc',
     padding: '4px',
     backgroundColor: isSelected ? '#f0f8ff' : 'transparent',
-    transition: 'all 0.2s ease'
+    transition: isResizing ? 'none' : 'all 0.2s ease'
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -55,7 +54,6 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
     if (!onUpdate) return;
 
     setIsResizing(true);
-    setResizeDirection(direction);
 
     startPos.current = {
       x: e.clientX,
@@ -113,7 +111,6 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
 
     const handleMouseUp = () => {
       setIsResizing(false);
-      setResizeDirection('');
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };

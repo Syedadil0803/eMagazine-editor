@@ -16,6 +16,8 @@ const FlipbookEditor: React.FC = () => {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
 
+  const generateId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
+
   // Convert flipbook pages to magazine format for preview
   const convertToMagazinePages = () => {
     return pages.map((page, index) => ({
@@ -49,10 +51,6 @@ const FlipbookEditor: React.FC = () => {
     const html = generateFlipBookHtml({
       pages: magazinePages,
       currentPageIndex: currentPage,
-      currentValues: {
-        subject: 'Flipbook Preview',
-        content: magazinePages[currentPage]?.content || { type: 'page', children: [] }
-      },
       templateSubject: 'Flipbook Preview'
     });
 
@@ -69,7 +67,7 @@ const FlipbookEditor: React.FC = () => {
     switch (type) {
       case 'text':
         newElement = {
-          id: `text-${Date.now()}`,
+          id: generateId('text'),
           type: 'text',
           content: 'New Text Element',
           x: 50,
@@ -85,7 +83,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'image':
         newElement = {
-          id: `image-${Date.now()}`,
+          id: generateId('image'),
           type: 'image',
           src: 'https://picsum.photos/seed/flipbook/400/300.jpg',
           alt: 'Sample Image',
@@ -99,7 +97,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'video':
         newElement = {
-          id: `video-${Date.now()}`,
+          id: generateId('video'),
           type: 'video',
           src: 'https://www.w3schools.com/html/mov_bbb.mp4',
           x: 50,
@@ -113,7 +111,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'audio':
         newElement = {
-          id: `audio-${Date.now()}`,
+          id: generateId('audio'),
           type: 'audio',
           src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
           title: 'Audio Track',
@@ -128,7 +126,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'button':
         newElement = {
-          id: `button-${Date.now()}`,
+          id: generateId('button'),
           type: 'button',
           text: 'Click Me',
           backgroundColor: '#1890ff',
@@ -145,7 +143,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'divider':
         newElement = {
-          id: `divider-${Date.now()}`,
+          id: generateId('divider'),
           type: 'divider',
           x: 50,
           y: 50,
@@ -157,7 +155,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'shape':
         newElement = {
-          id: `shape-${Date.now()}`,
+          id: generateId('shape'),
           type: 'shape',
           shape: 'rectangle',
           x: 50,
@@ -172,7 +170,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'spacer':
         newElement = {
-          id: `spacer-${Date.now()}`,
+          id: generateId('spacer'),
           type: 'spacer',
           x: 50,
           y: 50,
@@ -182,7 +180,7 @@ const FlipbookEditor: React.FC = () => {
         break;
       case 'product':
         newElement = {
-          id: `product-${Date.now()}`,
+          id: generateId('product'),
           type: 'product',
           title: 'Product Title',
           description: 'Product description goes here',
@@ -200,16 +198,24 @@ const FlipbookEditor: React.FC = () => {
 
     setPages(prev => {
       const newPages = [...prev];
+      
+      // Check for duplicate IDs in current page and remove the old one if found
+      const existingIds = newPages[currentPage].elements.map(el => el.id);
+      if (existingIds.includes(newElement.id)) {
+        // Remove the old element with the same ID
+        newPages[currentPage].elements = newPages[currentPage].elements.filter(el => el.id !== newElement.id);
+      }
+      
       newPages[currentPage].elements.push(newElement);
       return newPages;
     });
   }, [currentPage]);
 
-  const updateElement = useCallback((elementId: string, updates: Partial<Element>) => {
+  const updateElement = useCallback(<T extends Element>(elementId: string, updates: Partial<T>) => {
     setPages(prev => {
       const newPages = [...prev];
       newPages[currentPage].elements = newPages[currentPage].elements.map(el =>
-        el.id === elementId ? { ...el, ...updates } : el
+        el.id === elementId ? { ...el, ...updates } as T : el
       );
       return newPages;
     });
@@ -246,7 +252,7 @@ const FlipbookEditor: React.FC = () => {
 
   const addNewPage = useCallback(() => {
     const newPage: Page = {
-      id: `page-${Date.now()}`,
+      id: generateId('page'),
       elements: []
     };
     setPages(prev => [...prev, newPage]);
@@ -294,12 +300,13 @@ const FlipbookEditor: React.FC = () => {
               style={{ marginTop: '8px' }}
             />
           </div>
-          {(selectedEl as any).content && (
+          {selectedEl.type === 'text' && (
             <div>
               <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Content</label>
               <Input
                 value={(selectedEl as any).content || ''}
                 onChange={(value) => updateElement(selectedEl.id, { content: value })}
+                placeholder="Enter text content..."
               />
             </div>
           )}
@@ -319,7 +326,12 @@ const FlipbookEditor: React.FC = () => {
               <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Color</label>
               <ColorPicker
                 value={(selectedEl as any).color || '#000000'}
-                onChange={(value) => updateElement(selectedEl.id, { color: value })}
+                onChange={(value) => {
+                  const colorValue = typeof value === 'string' ? value : 
+                                    (value && typeof value === 'object' && 'color' in value) ? (value as any).color : 
+                                    '#000000';
+                  updateElement(selectedEl.id, { color: colorValue });
+                }}
               />
             </div>
           )}

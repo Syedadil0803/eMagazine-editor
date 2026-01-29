@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Element } from './ElementTypes';
 
 interface FlipbookViewerProps {
@@ -10,7 +10,6 @@ export const FlipbookViewer: React.FC<FlipbookViewerProps> = ({ pages, currentPa
   const [currentSpread, setCurrentSpread] = useState(0);
   const [isFlipping, setIsFlipping] = useState(false);
   const [flipDirection, setFlipDirection] = useState<'next' | 'prev' | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Calculate spreads (2 pages per spread)
   const spreads = [];

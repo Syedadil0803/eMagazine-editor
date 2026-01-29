@@ -14,7 +14,6 @@ declare global {
 
 export const MagazineFlipbookViewer: React.FC<MagazineFlipbookViewerProps> = ({ pages, currentPage }) => {
   const [pageFlip, setPageFlip] = useState<any>(null);
-  const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const bookRef = useRef<HTMLDivElement>(null);
   const scriptRef = useRef<HTMLScriptElement | null>(null);
@@ -23,6 +22,8 @@ export const MagazineFlipbookViewer: React.FC<MagazineFlipbookViewerProps> = ({ 
     switch (element.type) {
       case 'text':
         const textEl = element as any;
+        // Show empty text boxes with a subtle border instead of hiding them
+        const isEmpty = !textEl.content || textEl.content.trim() === '';
         return (
           <div
             style={{
@@ -36,10 +37,13 @@ export const MagazineFlipbookViewer: React.FC<MagazineFlipbookViewerProps> = ({ 
               fontFamily: textEl.fontFamily,
               textAlign: textEl.textAlign,
               lineHeight: textEl.lineHeight,
-              whiteSpace: 'pre-wrap'
+              whiteSpace: 'pre-wrap',
+              border: isEmpty ? '1px dashed #ccc' : 'none',
+              backgroundColor: isEmpty ? '#f9f9f9' : 'transparent',
+              minHeight: '20px'
             }}
           >
-            {textEl.content}
+            {textEl.content || (isEmpty && <span style={{ color: '#999' }}>Empty text</span>)}
           </div>
         );
 
@@ -336,9 +340,7 @@ export const MagazineFlipbookViewer: React.FC<MagazineFlipbookViewerProps> = ({ 
     const initialBookWidth = initialBookHeight * 0.707;
     
     if ((initialBookWidth * 2) > (availableWidth * 0.9)) {
-      const maxSpreadWidth = availableWidth * 0.9;
-      const bookWidth = maxSpreadWidth / 2;
-      const bookHeight = bookWidth / 0.707;
+      // Adjust width if needed for smaller screens
     }
 
     const flipBook = new window.St.PageFlip(bookRef.current, {
@@ -357,7 +359,6 @@ export const MagazineFlipbookViewer: React.FC<MagazineFlipbookViewerProps> = ({ 
     });
 
     const pageElements = bookRef.current.querySelectorAll('.page');
-    setTotalPages(pageElements.length);
     flipBook.loadFromHTML(pageElements);
     
     flipBook.on('flip', (e: any) => {
