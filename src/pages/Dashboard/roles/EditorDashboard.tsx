@@ -1,17 +1,17 @@
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, Button, Select, Modal, Input, Message } from '@arco-design/web-react';
 import { IconSearch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import styles from '../components/Components.module.scss';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { createContent } from '@demo/services/content';
-import { getCurrentUser, getAuthToken } from '@demo/services/auth';
-import CONFIG from '@demo/config';
-import qs from 'qs';
+import { getCurrentUser } from '@demo/services/auth';
 
 const TabPane = Tabs.TabPane;
 
 const EditorDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('1');
     const { canAccessTab, isAdmin, canPerformAction, permissions } = usePermissions();
     const currentUser = getCurrentUser();
@@ -42,18 +42,7 @@ const EditorDashboard: React.FC = () => {
                 setNewContentTitle('');
 
                 const contentId = result.data._id;
-                const params = {
-                    content_id: contentId,
-                    title: newContentTitle,
-                    user_id: currentUser?.id,
-                    user_name: currentUser?.name || currentUser?.email,
-                    token: getAuthToken(),
-                    editor_api_url: CONFIG.EDITOR_API_URL
-                };
-                const editorUrl = CONFIG.EDITOR_WEBSITE.endsWith('/')
-                    ? `${CONFIG.EDITOR_WEBSITE}create-magazine`
-                    : `${CONFIG.EDITOR_WEBSITE}/create-magazine`;
-                window.location.href = `${editorUrl}?${qs.stringify(params)}`;
+                navigate(`/create-magazine?content_id=${contentId}&title=${encodeURIComponent(newContentTitle)}`);
             } else {
                 Message.error(result.message || 'Failed to create content');
             }

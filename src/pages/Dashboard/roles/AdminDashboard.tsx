@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tag, Select, Spin } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import { getAllContent, getContentVersions } from '@demo/services/content';
-import { getCurrentUser, getAuthToken } from '@demo/services/auth';
-import CONFIG from '@demo/config';
-import qs from 'qs';
 import styles from '../components/Components.module.scss';
 
 interface ContentWithVersion {
@@ -22,6 +20,7 @@ interface ContentWithVersion {
 }
 
 const AdminDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [contents, setContents] = useState<ContentWithVersion[]>([]);
     const [stats, setStats] = useState([
@@ -98,25 +97,16 @@ const AdminDashboard: React.FC = () => {
     };
 
     const handleContentClick = (content: ContentWithVersion) => {
-        const currentUser = getCurrentUser();
         if (content._id) {
-            const params = {
-                content_id: content._id,
-                content_version_id: content.version?._id,
-                subject: content.title,
-                title: content.title,
-                user_id: currentUser?.id,
-                user_name: currentUser?.name || currentUser?.email,
-                token: getAuthToken(),
-                editor_api_url: CONFIG.EDITOR_API_URL
-            };
+            const title = content.title;
 
-            let targetPath = '';
-            if (!content.version?._id) {
-                targetPath = CONFIG.EDITOR_WEBSITE.endsWith('/') ? 'create-magazine' : '/create-magazine';
+            if (content.version?._id) {
+                // Has version, navigate to editor
+                navigate(`/editor?content_id=${content._id}&content_version_id=${content.version._id}&subject=${encodeURIComponent(title)}`);
+            } else {
+                // No version, navigate to create-magazine
+                navigate(`/create-magazine?content_id=${content._id}&title=${encodeURIComponent(title)}`);
             }
-
-            window.location.href = `${CONFIG.EDITOR_WEBSITE}${targetPath}?${qs.stringify(params)}`;
         }
     };
 

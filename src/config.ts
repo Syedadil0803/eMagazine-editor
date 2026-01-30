@@ -45,6 +45,9 @@ const CONFIG = {
   // Approval Backend URL
   APPROVAL_API_URL: APPROVAL_API_URL || 'http://localhost:3003',
 
+  // Publish Backend URL
+  PUBLISH_API_URL: import.meta.env.VITE_PUBLISH_API_URL || 'http://localhost:3004',
+
   // Editor Website URL
   EDITOR_WEBSITE: EDITOR_WEBSITE || 'http://localhost:3001/',
 };

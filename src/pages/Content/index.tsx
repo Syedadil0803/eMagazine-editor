@@ -27,9 +27,6 @@ import {
     Content,
     ContentVersion
 } from '@demo/services/content';
-import { getAuthToken } from '@demo/services/auth';
-import CONFIG from '@demo/config';
-import qs from 'qs';
 
 // Map backend role names to frontend UserRole types
 const mapBackendRoleToUserRole = (backendRole: string): UserRole => {
@@ -171,20 +168,8 @@ const ContentPage: React.FC = () => {
                 setNewDepartment('');
 
                 // Navigate to template selection with the new content ID
-                // Navigate to external editor website
                 const contentId = result.data._id;
-                const params = {
-                    content_id: contentId,
-                    title: newContentTitle,
-                    user_id: currentUser?.id,
-                    user_name: currentUser?.name || currentUser?.email,
-                    token: getAuthToken(),
-                    editor_api_url: CONFIG.EDITOR_API_URL
-                };
-                const editorUrl = CONFIG.EDITOR_WEBSITE.endsWith('/')
-                    ? `${CONFIG.EDITOR_WEBSITE}create-magazine`
-                    : `${CONFIG.EDITOR_WEBSITE}/create-magazine`;
-                window.location.href = `${editorUrl}?${qs.stringify(params)}`;
+                navigate(`/create-magazine?content_id=${contentId}&title=${encodeURIComponent(newContentTitle)}`);
             } else {
                 Message.error(result.message || 'Failed to create content');
             }
@@ -236,34 +221,12 @@ const ContentPage: React.FC = () => {
                 const title = content?.title || 'Untitled';
 
                 // Navigate to editor with content_version_id
-                // Navigate to external editor website
-                const params = {
-                    content_id: contentId,
-                    content_version_id: latestVersion._id,
-                    subject: title,
-                    user_id: currentUser?.id,
-                    user_name: currentUser?.name || currentUser?.email,
-                    token: getAuthToken(),
-                    editor_api_url: CONFIG.EDITOR_API_URL
-                };
-                window.location.href = `${CONFIG.EDITOR_WEBSITE}?${qs.stringify(params)}`;
+                navigate(`/editor?content_id=${contentId}&content_version_id=${latestVersion._id}&subject=${encodeURIComponent(title)}`);
             } else {
-                // No versions yet, redirect to external editor for template selection/creation
+                // No versions yet, redirect to template selection
                 const content = contents.find(c => c._id === contentId);
                 const title = content?.title || 'Untitled';
-
-                const params = {
-                    content_id: contentId,
-                    title: title,
-                    user_id: currentUser?.id,
-                    user_name: currentUser?.name || currentUser?.email,
-                    token: getAuthToken(),
-                    editor_api_url: CONFIG.EDITOR_API_URL
-                };
-                const editorUrl = CONFIG.EDITOR_WEBSITE.endsWith('/')
-                    ? `${CONFIG.EDITOR_WEBSITE}create-magazine`
-                    : `${CONFIG.EDITOR_WEBSITE}/create-magazine`;
-                window.location.href = `${editorUrl}?${qs.stringify(params)}`;
+                navigate(`/create-magazine?content_id=${contentId}&title=${encodeURIComponent(title)}`);
             }
         } catch (error) {
             console.error('Error loading content:', error);

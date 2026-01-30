@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Tag, Avatar, Select, Spin, Modal, Input, Message } from '@arco-design/web-react';
 import { IconPlus, IconRight } from '@arco-design/web-react/icon';
 import styles from '../components/Components.module.scss';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getAllContent, createContent, Content } from '@demo/services/content';
-import { getCurrentUser, getAuthToken } from '@demo/services/auth';
-import CONFIG from '@demo/config';
-import qs from 'qs';
+import { getAllContent, createContent, Content, getContentVersions } from '@demo/services/content';
+import { getCurrentUser } from '@demo/services/auth';
 
 const AuthorDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const { canPerformAction } = usePermissions();
     const currentUser = getCurrentUser();
     const [sortFilter, setSortFilter] = useState('ALL');
@@ -60,20 +60,8 @@ const AuthorDashboard: React.FC = () => {
                 setCreateModalVisible(false);
                 setNewContentTitle('');
 
-                // Navigate to external editor website
                 const contentId = result.data._id;
-                const params = {
-                    content_id: contentId,
-                    title: newContentTitle,
-                    user_id: currentUser?.id,
-                    user_name: currentUser?.name || currentUser?.email,
-                    token: getAuthToken(),
-                    editor_api_url: CONFIG.EDITOR_API_URL
-                };
-                const editorUrl = CONFIG.EDITOR_WEBSITE.endsWith('/')
-                    ? `${CONFIG.EDITOR_WEBSITE}create-magazine`
-                    : `${CONFIG.EDITOR_WEBSITE}/create-magazine`;
-                window.location.href = `${editorUrl}?${qs.stringify(params)}`;
+                navigate(`/create-magazine?content_id=${contentId}&title=${encodeURIComponent(newContentTitle)}`);
             } else {
                 Message.error(result.message || 'Failed to create content');
             }
@@ -85,17 +73,23 @@ const AuthorDashboard: React.FC = () => {
         }
     };
 
-    const handleViewContent = (contentId: string) => {
-        const content = contents.find(c => c._id === contentId);
-        const params = {
-            content_id: contentId,
-            subject: content?.title || 'Untitled',
-            user_id: currentUser?.id,
-            user_name: currentUser?.name || currentUser?.email,
-            token: getAuthToken(),
-            editor_api_url: CONFIG.EDITOR_API_URL
-        };
-        window.location.href = `${CONFIG.EDITOR_WEBSITE}?${qs.stringify(params)}`;
+    const handleViewContent = async (contentId: string) => {
+        try {
+            const versions = await getContentVersions(contentId);
+            const content = contents.find(c => c._id === contentId);
+            const title = content?.title || 'Untitled';
+
+            if (versions && versions.length > 0) {
+                const liveVersion = versions.find(v => v.is_live);
+                const latestVersion = liveVersion || versions[versions.length - 1];
+                navigate(`/editor?content_id=${contentId}&content_version_id=${latestVersion._id}&subject=${encodeURIComponent(title)}`);
+            } else {
+                navigate(`/create-magazine?content_id=${contentId}&title=${encodeURIComponent(title)}`);
+            }
+        } catch (error) {
+            console.error('Error loading content:', error);
+            Message.error('Failed to load content');
+        }
     };
 
     // Calculate stats from real data

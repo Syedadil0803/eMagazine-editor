@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const universityChronicleData = {
     "document": {
         "id": "university-chronicle-magazine",
-        "pageSize": { "width": 1240, "height": 1754, "unit": "px" },
+        "pageSize": { "width": 800, "height": 1000, "unit": "px" },
         "pages": [
             {
                 "id": "page-cover",
@@ -14,11 +14,11 @@ export const universityChronicleData = {
                         "id": "edition",
                         "type": "text",
                         "x": 0,
-                        "y": 40,
+                        "y": 20,
                         "content": "AUTUMN 2025 | VOL. 84",
                         "font": {
                             "family": "Merriweather",
-                            "size": 16,
+                            "size": 12,
                             "weight": 700,
                             "align": "center",
                             "color": "#8B2E2E",
@@ -29,11 +29,11 @@ export const universityChronicleData = {
                         "id": "title",
                         "type": "text",
                         "x": 0,
-                        "y": 80,
+                        "y": 50,
                         "content": "University Chronicle",
                         "font": {
                             "family": "Cinzel",
-                            "size": 72,
+                            "size": 48,
                             "weight": 700,
                             "align": "center",
                             "color": "#1A1A1A"
@@ -43,11 +43,11 @@ export const universityChronicleData = {
                         "id": "subtitle",
                         "type": "text",
                         "x": 0,
-                        "y": 160,
+                        "y": 110,
                         "content": "ESTABLISHED 1941",
                         "font": {
                             "family": "Lato",
-                            "size": 12,
+                            "size": 10,
                             "weight": 400,
                             "align": "center",
                             "color": "#666"
@@ -57,20 +57,20 @@ export const universityChronicleData = {
                         "id": "cover-image",
                         "type": "image",
                         "x": 0,
-                        "y": 200,
-                        "width": 1240,
-                        "height": 600,
+                        "y": 140,
+                        "width": 800,
+                        "height": 400,
                         "src": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop"
                     },
                     {
                         "id": "feature-tag",
                         "type": "text",
-                        "x": 100,
-                        "y": 840,
+                        "x": 50,
+                        "y": 560,
                         "content": "FEATURE STORY",
                         "font": {
                             "family": "Lato",
-                            "size": 14,
+                            "size": 12,
                             "weight": 700,
                             "color": "#8B2E2E",
                             "letterSpacing": 1
@@ -79,13 +79,13 @@ export const universityChronicleData = {
                     {
                         "id": "feature-title",
                         "type": "text",
-                        "x": 100,
-                        "y": 870,
-                        "width": 800,
+                        "x": 50,
+                        "y": 590,
+                        "width": 700,
                         "content": "The Future of Tradition: \nKeeping Campus Heritage Alive",
                         "font": {
                             "family": "Merriweather",
-                            "size": 42,
+                            "size": 28,
                             "weight": 700,
                             "color": "#1A1A1A",
                             "lineHeight": 1.2
@@ -94,13 +94,13 @@ export const universityChronicleData = {
                     {
                         "id": "feature-summary",
                         "type": "text",
-                        "x": 100,
-                        "y": 980,
-                        "width": 600,
+                        "x": 50,
+                        "y": 680,
+                        "width": 500,
                         "content": "As we modernize our facilities, how do we preserve the historical essence that defines our alma mater? Features an interview with the Dean of Architecture.",
                         "font": {
                             "family": "Lato",
-                            "size": 18,
+                            "size": 14,
                             "lineHeight": 1.6,
                             "color": "#444"
                         }
@@ -116,19 +116,19 @@ export const universityChronicleData = {
                         "type": "image",
                         "x": 0,
                         "y": 0,
-                        "width": 1240,
-                        "height": 500,
+                        "width": 800,
+                        "height": 350,
                         "src": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
                     },
                     {
                         "id": "article-title",
                         "type": "text",
-                        "x": 100,
-                        "y": 540,
+                        "x": 50,
+                        "y": 380,
                         "content": "Student Life Reimagined",
                         "font": {
                             "family": "Cinzel",
-                            "size": 48,
+                            "size": 32,
                             "weight": 700,
                             "color": "#1A1A1A"
                         }
@@ -136,12 +136,12 @@ export const universityChronicleData = {
                     {
                         "id": "article-byline",
                         "type": "text",
-                        "x": 100,
-                        "y": 600,
+                        "x": 50,
+                        "y": 430,
                         "content": "By Sarah Jenkins, Class of '26",
                         "font": {
                             "family": "Lato",
-                            "size": 14,
+                            "size": 12,
                             "style": "italic",
                             "color": "#666"
                         }
@@ -149,13 +149,13 @@ export const universityChronicleData = {
                     {
                         "id": "intro-text",
                         "type": "text",
-                        "x": 100,
-                        "y": 650,
-                        "width": 1040,
+                        "x": 50,
+                        "y": 470,
+                        "width": 700,
                         "content": "The campus buzzes with a new energy this semester. Clubs are expanding, libraries are full, and the quad is once again the center of student life. But beneath the surface, a new culture of collaboration is emerging.",
                         "font": {
                             "family": "Merriweather",
-                            "size": 20,
+                            "size": 16,
                             "weight": 300,
                             "lineHeight": 1.8,
                             "color": "#333"
@@ -164,13 +164,13 @@ export const universityChronicleData = {
                     {
                         "id": "body-text-1",
                         "type": "text",
-                        "x": 100,
-                        "y": 780,
-                        "width": 1040,
+                        "x": 50,
+                        "y": 600,
+                        "width": 700,
                         "content": "Whatever the reason, the shift is palpable. 'I feel more connected to my peers than ever,' says mark, a sophomore majoring in History. This sentiment is echoed across departments, from the sciences to the arts.",
                         "font": {
                             "family": "Lato",
-                            "size": 16,
+                            "size": 14,
                             "lineHeight": 1.7,
                             "color": "#444"
                         }
@@ -184,21 +184,21 @@ export const universityChronicleData = {
                     {
                         "id": "closing-image",
                         "type": "image",
-                        "x": 120,
-                        "y": 150,
-                        "width": 1000,
-                        "height": 600,
+                        "x": 100,
+                        "y": 100,
+                        "width": 600,
+                        "height": 400,
                         "src": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"
                     },
                     {
                         "id": "contact-header",
                         "type": "text",
                         "x": 0,
-                        "y": 800,
+                        "y": 550,
                         "content": "Join The Chronicle Team",
                         "font": {
                             "family": "Cinzel",
-                            "size": 32,
+                            "size": 24,
                             "weight": 700,
                             "align": "center",
                             "color": "#1A1A1A"
@@ -207,13 +207,13 @@ export const universityChronicleData = {
                     {
                         "id": "contact-text",
                         "type": "text",
-                        "x": 300,
-                        "y": 860,
-                        "width": 640,
+                        "x": 100,
+                        "y": 600,
+                        "width": 600,
                         "content": "We are looking for writers, photographers, and editors for the Spring semester. \nApply online or visit us in the Student Union, Room 304.",
                         "font": {
                             "family": "Lato",
-                            "size": 16,
+                            "size": 14,
                             "align": "center",
                             "lineHeight": 1.6,
                             "color": "#555"
@@ -223,11 +223,11 @@ export const universityChronicleData = {
                         "id": "footer",
                         "type": "text",
                         "x": 0,
-                        "y": 1000,
+                        "y": 950,
                         "content": "© 2025 University Chronicle. All rights reserved.",
                         "font": {
                             "family": "Lato",
-                            "size": 12,
+                            "size": 10,
                             "align": "center",
                             "color": "#999"
                         }
@@ -238,13 +238,10 @@ export const universityChronicleData = {
     }
 };
 
-
-
-
 export const campusReviewData = {
     "document": {
         "id": "editorial-magazine-with-images",
-        "pageSize": { "width": 1240, "height": 1754, "unit": "px" },
+        "pageSize": { "width": 800, "height": 1000, "unit": "px" },
         "pages": [
             {
                 "id": "page-cover",
@@ -258,7 +255,7 @@ export const campusReviewData = {
                         "content": "CAMPUS <span style='color:#F05A28'>REVIEW</span>",
                         "font": {
                             "family": "Oswald",
-                            "size": 60,
+                            "size": 48,
                             "weight": 700,
                             "align": "left",
                             "color": "#000",
@@ -269,11 +266,11 @@ export const campusReviewData = {
                         "id": "date-line",
                         "type": "text",
                         "x": 0,
-                        "y": 70,
+                        "y": 60,
                         "content": "ISSUE 42 • SEPTEMBER 2025 • STUDENT VOICE",
                         "font": {
                             "family": "Roboto",
-                            "size": 12,
+                            "size": 10,
                             "weight": 500,
                             "align": "left",
                             "color": "#888",
@@ -284,20 +281,20 @@ export const campusReviewData = {
                         "id": "cover-main-image",
                         "type": "image",
                         "x": 0,
-                        "y": 120,
-                        "width": 1240,
-                        "height": 700,
+                        "y": 100,
+                        "width": 800,
+                        "height": 500,
                         "src": "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop"
                     },
                     {
                         "id": "cover-headline-1",
                         "type": "text",
                         "x": 0,
-                        "y": 850,
+                        "y": 620,
                         "content": "SILENT SPACES",
                         "font": {
                             "family": "Playfair Display",
-                            "size": 72,
+                            "size": 48,
                             "weight": 700,
                             "align": "left",
                             "color": "#111"
@@ -307,12 +304,12 @@ export const campusReviewData = {
                         "id": "cover-sub-1",
                         "type": "text",
                         "x": 0,
-                        "y": 940,
-                        "width": 600,
+                        "y": 700,
+                        "width": 500,
                         "content": "Why the campus library remains the heart of the university in a digital age.",
                         "font": {
                             "family": "Roboto",
-                            "size": 20,
+                            "size": 16,
                             "lineHeight": 1.4,
                             "align": "left",
                             "color": "#444"
@@ -329,19 +326,19 @@ export const campusReviewData = {
                         "type": "image",
                         "x": 0,
                         "y": 0,
-                        "width": 1240,
-                        "height": 550,
+                        "width": 800,
+                        "height": 400,
                         "src": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2049&auto=format&fit=crop"
                     },
                     {
                         "id": "art-title",
                         "type": "text",
                         "x": 0,
-                        "y": 580,
+                        "y": 420,
                         "content": "The Digital Detox",
                         "font": {
                             "family": "Oswald",
-                            "size": 48,
+                            "size": 32,
                             "weight": 500,
                             "color": "#000"
                         }
@@ -350,12 +347,12 @@ export const campusReviewData = {
                         "id": "art-body",
                         "type": "text",
                         "x": 0,
-                        "y": 660,
-                        "width": 1240,
+                        "y": 480,
+                        "width": 800,
                         "content": "In a world of constant notifications, students are finding refuge in analog habits. Sales of physical notebooks are up, and 'laptop-free' study zones are packed.",
                         "font": {
                             "family": "Roboto",
-                            "size": 18,
+                            "size": 14,
                             "lineHeight": 1.6,
                             "color": "#333"
                         }
@@ -370,20 +367,20 @@ export const campusReviewData = {
                         "id": "end-img",
                         "type": "image",
                         "x": 0,
-                        "y": 100,
-                        "width": 1000,
-                        "height": 600,
+                        "y": 50,
+                        "width": 800,
+                        "height": 450,
                         "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop"
                     },
                     {
                         "id": "end-txt",
                         "type": "text",
                         "x": 0,
-                        "y": 750,
+                        "y": 550,
                         "content": "NEXT MONTH: THE ART ISSUE",
                         "font": {
                             "family": "Oswald",
-                            "size": 36,
+                            "size": 28,
                             "align": "center",
                             "color": "#FFF",
                             "letterSpacing": 4
@@ -482,7 +479,7 @@ export const getMockTemplate = (id?: number): { pages: any[] } => {
         const pageBlock = {
             type: BasicType.PAGE,
             attributes: {
-                width: '794px', // A4 equivalent width for editor
+                width: '800px', // Adjusted for editor
                 'background-color': pageData.backgroundColor,
             },
             data: {

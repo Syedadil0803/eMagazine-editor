@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Message } from '@arco-design/web-react';
+import { Message, Button } from '@arco-design/web-react';
 import { getEMagsByContentVersion } from '@demo/services/editor';
 import { generateFlipBookHtml } from '@demo/pages/Home/components/FlipBookExport';
 import { Loading } from '@demo/components/loading';
@@ -9,6 +9,7 @@ const PreviewPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(true);
+    const [htmlContent, setHtmlContent] = useState<string>('');
 
     const params = new URLSearchParams(location.search);
     const contentVersionId = params.get('content_version_id');
@@ -44,29 +45,16 @@ const PreviewPage: React.FC = () => {
                             mergeTags: {}
                         });
 
-                        // Open in new window (same as editor's View button)
-                        const win = window.open('', '_blank');
-                        if (win) {
-                            win.document.write(flipbookHtml);
-                            win.document.close();
-                            // Go back after opening preview
-                            navigate(-1);
-                        } else {
-                            Message.error('Please allow popups to view the magazine');
-                            navigate(-1);
-                        }
+                        setHtmlContent(flipbookHtml);
                     } else {
                         Message.error('No pages found in magazine');
-                        navigate(-1);
                     }
                 } else {
-                    Message.error('No magazine data found');
-                    navigate(-1);
+                    Message.warning('No magazine data found. Please edit and save the content first.');
                 }
             } catch (error) {
                 console.error('Error loading preview:', error);
                 Message.error('Failed to load preview');
-                navigate(-1);
             } finally {
                 setLoading(false);
             }
@@ -75,29 +63,61 @@ const PreviewPage: React.FC = () => {
         loadPreview();
     }, [contentVersionId, subject, navigate]);
 
-    return (
-        <Loading loading={loading}>
+    if (loading) {
+        return (
+            <Loading loading={loading}>
+                <div style={{
+                    height: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#f5f5f5'
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div className="loader" style={{
+                            fontSize: '48px',
+                            color: '#1890ff',
+                            marginBottom: '20px'
+                        }}>
+                            <i className="fas fa-spinner fa-spin"></i>
+                        </div>
+                        <p style={{ fontSize: '18px', color: '#666' }}>
+                            Loading preview...
+                        </p>
+                    </div>
+                </div>
+            </Loading>
+        );
+    }
+
+    if (!htmlContent) {
+        return (
             <div style={{
                 height: '100vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexDirection: 'column',
                 background: '#f5f5f5'
             }}>
-                <div style={{ textAlign: 'center' }}>
-                    <div className="loader" style={{
-                        fontSize: '48px',
-                        color: '#1890ff',
-                        marginBottom: '20px'
-                    }}>
-                        <i className="fas fa-spinner fa-spin"></i>
-                    </div>
-                    <p style={{ fontSize: '18px', color: '#666' }}>
-                        Opening preview...
-                    </p>
-                </div>
+                <p>No content to display.</p>
+                <Button type="primary" onClick={() => navigate(-1)}>Go Back</Button>
             </div>
-        </Loading>
+        );
+    }
+
+    return (
+        <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+            <iframe
+                title="Magazine Preview"
+                srcDoc={htmlContent}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                }}
+            />
+        </div>
     );
 };
 

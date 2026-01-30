@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Select, Tag } from '@arco-design/web-react';
 import { IconPlus, IconRight } from '@arco-design/web-react/icon';
 import styles from '../components/Components.module.scss';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getCurrentUser, getAuthToken } from '@demo/services/auth';
-import CONFIG from '@demo/config';
-import qs from 'qs';
 
 const ReviewerDashboard: React.FC = () => {
+    const navigate = useNavigate();
     const { canPerformAction } = usePermissions();
     const [statusFilter, setStatusFilter] = useState('Status: optional');
     const [authorFilter, setAuthorFilter] = useState('Author: US#1');
@@ -31,17 +30,7 @@ const ReviewerDashboard: React.FC = () => {
     };
 
     const handleNewContent = () => {
-        const currentUser = getCurrentUser();
-        const params = {
-            user_id: currentUser?.id,
-            user_name: currentUser?.name || currentUser?.email,
-            token: getAuthToken(),
-            editor_api_url: CONFIG.EDITOR_API_URL
-        };
-        const editorUrl = CONFIG.EDITOR_WEBSITE.endsWith('/')
-            ? `${CONFIG.EDITOR_WEBSITE}create-magazine`
-            : `${CONFIG.EDITOR_WEBSITE}/create-magazine`;
-        window.location.href = `${editorUrl}?${qs.stringify(params)}`;
+        navigate('/create-magazine');
     };
 
     const queueData = [

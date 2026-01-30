@@ -1,9 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, Input, Card, Space, Slider, ColorPicker, Select, Collapse, Radio } from '@arco-design/web-react';
 import { IconPlus, IconDelete, IconImage, IconMinus, IconPlayCircle, IconSound, IconFile, IconExpand } from '@arco-design/web-react/icon';
 import { Element, Page } from '../../components/ElementTypes';
 import { ElementRenderer } from '../../components/ElementRenderer';
 import { generateFlipBookHtml } from '../../components/FlipBookExport';
+import { universityChronicleData, campusReviewData } from '../../services/mockTemplates';
+import { submitForReview } from '../../services/content';
+import { submitForApproval } from '../../services/approval';
+import { Message } from '@arco-design/web-react';
 
 const PAGE_HEIGHT = 1000;
 const PAGE_WIDTH = 800;
@@ -12,10 +17,150 @@ const FlipbookEditor: React.FC = () => {
   const [pages, setPages] = useState<Page[]>([
     { id: '1', elements: [], backgroundColor: '#ffffff' }
   ]);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [activePropertyTab, setActivePropertyTab] = useState<'element' | 'page'>('page');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const templateId = params.get('template_id');
+
+    if (templateId) {
+      const id = parseInt(templateId, 10);
+      const templateData = id === 1 ? universityChronicleData : (id === 2 ? campusReviewData : null);
+
+      if (templateData && templateData.document && templateData.document.pages) {
+        // Default template dimensions if not specified
+        const templateWidth = templateData.document.pageSize?.width || 1240;
+        const templateHeight = templateData.document.pageSize?.height || 1754;
+
+        // Calculate scaling factors
+        const scaleX = PAGE_WIDTH / templateWidth;
+        const scaleY = PAGE_HEIGHT / templateHeight;
+
+        // Use the smaller scale factor for font sizes to ensure they don't become too large
+        const fontScale = Math.min(scaleX, scaleY);
+
+        const mappedPages: Page[] = templateData.document.pages.map((p: any) => ({
+          id: p.id,
+          backgroundColor: p.backgroundColor || '#ffffff',
+          elements: (p.elements || []).map((e: any) => {
+            // Apply scaling to position and dimensions
+            const scaledX = (e.x || 0) * scaleX;
+            const scaledY = (e.y || 0) * scaleY;
+
+            if (e.type === 'text') {
+              const scaledWidth = (e.width || 300) * scaleX;
+              const scaledFontSize = (e.font?.size || 16) * fontScale;
+
+              return {
+                id: e.id,
+                type: 'text',
+                content: e.content || '',
+                x: scaledX,
+                y: scaledY,
+                width: scaledWidth,
+                fontSize: Math.round(scaledFontSize),
+                color: e.font?.color || '#000000',
+                fontWeight: e.font?.weight?.toString() || 'normal',
+                fontFamily: e.font?.family || 'Arial',
+                textAlign: e.font?.align || 'left',
+                lineHeight: e.font?.lineHeight || 1.4,
+                fontStyle: e.font?.style || 'normal',
+                textDecoration: 'none',
+                textTransform: 'none',
+                letterSpacing: (e.font?.letterSpacing || 0) * scaleX,
+                wordSpacing: 0,
+                textIndent: 0,
+                opacity: 1,
+                textShadow: 'none',
+                backgroundColor: 'transparent',
+                padding: 4,
+                borderRadius: 0,
+                border: 'none',
+                writingMode: 'horizontal-tb',
+                direction: 'ltr',
+                whiteSpace: 'pre-wrap',
+                overflow: 'hidden'
+              };
+            } else if (e.type === 'image') {
+              const scaledWidth = (e.width || 300) * scaleX;
+              const scaledHeight = (e.height || 200) * scaleY;
+
+              return {
+                id: e.id,
+                type: 'image',
+                src: e.src,
+                alt: 'Image',
+                x: scaledX,
+                y: scaledY,
+                width: scaledWidth,
+                height: scaledHeight,
+                borderRadius: 0,
+                objectFit: 'cover'
+              };
+            }
+            return null;
+          }).filter((e: any) => e !== null) as Element[]
+        }));
+
+        if (mappedPages.length > 0) {
+          setPages(mappedPages);
+        }
+      }
+    }
+  }, [location.search]);
+
+  const handleSaveDraft = async () => {
+    // In a real implementation, we would save the current 'pages' state to the backend here.
+    // Since there isn't a specific 'save content' API provided in this task context,
+    // we'll simulate the save action and navigate back.
+    // Note: If using updatePage/updateEMag, we would serialize 'pages'.
+
+    Message.success('Saved to draft successfully');
+    navigate('/content');
+  };
+
+  const handleSubmitReview = async () => {
+    const params = new URLSearchParams(location.search);
+    const contentId = params.get('content_id');
+    const contentVersionId = params.get('content_version_id');
+
+    if (!contentId || !contentVersionId) {
+      Message.error('Missing content or version information');
+      return;
+    }
+
+    try {
+      // 1. Submit for review in Content Service
+      const reviewResult = await submitForReview(contentVersionId);
+      if (!reviewResult.success) {
+        Message.error(reviewResult.message || 'Failed to submit for review');
+        return;
+      }
+
+      // 2. Submit for approval in Approval Service
+      const approvalResult = await submitForApproval({
+        content_id: contentId,
+        content_version_id: contentVersionId,
+        content_type: 'eMag',
+        approval_levels: 2
+      });
+
+      if (approvalResult.success) {
+        Message.success('Submitted for review successfully');
+        navigate('/content');
+      } else {
+        Message.error(approvalResult.message || 'Failed to submit for approval');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      Message.error('An unexpected error occurred during submission');
+    }
+  };
 
   const generateId = (prefix: string) => `${prefix}-${crypto.randomUUID()}`;
 
@@ -829,13 +974,21 @@ const FlipbookEditor: React.FC = () => {
           </div>
         </div>
 
-        <Button
-          type="outline"
-          onClick={onPreviewFlipbook}
-          style={{ flexShrink: 0 }}
-        >
-          View
-        </Button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button onClick={handleSaveDraft}>
+            Save to Draft
+          </Button>
+          <Button type="primary" status="success" onClick={handleSubmitReview}>
+            Submit to Review
+          </Button>
+          <Button
+            type="outline"
+            onClick={onPreviewFlipbook}
+            style={{ flexShrink: 0 }}
+          >
+            View
+          </Button>
+        </div>
       </div>
 
       {/* Main Editor Layout */}

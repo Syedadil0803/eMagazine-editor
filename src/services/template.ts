@@ -46,7 +46,7 @@ export const template = {
   fetchDefaultTemplate: () => {
     const pageBlock = BlockManager.getBlockByType(BasicType.PAGE)?.create({
       attributes: {
-        width: '794px',
+        width: '800px',
       },
     });
     if (pageBlock) {
