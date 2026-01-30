@@ -1,0 +1,449 @@
+/* src/pages/CreateMagazine/styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;800&family=Cinzel:wght@700&family=Merriweather:wght@300;700&family=Lato:wght@400;700&family=Oswald:wght@500;700&family=Roboto:wght@500&display=swap');
+
+.create-magazine-container {
+    min-height: 100vh;
+    padding: 40px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Inter', sans-serif;
+    position: relative;
+}
+
+.fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header-section {
+    text-align: center;
+    margin: 40px 0 60px;
+}
+
+.page-title {
+    font-size: 48px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+    background: linear-gradient(120deg, #2b32b2, #1488cc);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.page-subtitle {
+    font-size: 18px;
+    color: #555;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 30px;
+    max-width: 1150px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+.template-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.template-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.template-card.selected {
+    border-color: #1488cc;
+    box-shadow: 0 0 0 4px rgba(20, 136, 204, 0.15);
+}
+
+.card-cover {
+    height: 260px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.blank-cover {
+    background: #f0f2f5;
+    color: #999;
+}
+
+.cover-content {
+    text-align: center;
+    padding: 16px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.02);
+}
+
+.template-preview-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+}
+
+.template-preview-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.7;
+}
+
+.card-info {
+    padding: 24px;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #222;
+}
+
+.card-desc {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.5;
+}
+
+.naming-container {
+    max-width: 680px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 60px;
+    border-radius: 30px;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.magazine-title-input {
+    display: block;
+    width: 100%;
+    font-size: 36px !important;
+    font-weight: 700 !important;
+    text-align: center;
+    color: #111 !important;
+    border: none !important;
+    border-bottom: 3px solid #eee !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 20px 0 !important;
+    margin-bottom: 50px;
+    transition: all 0.3s;
+    font-family: 'Playfair Display', serif !important;
+}
+
+.magazine-title-input:focus {
+    border-bottom-color: #1488cc !important;
+    outline: none;
+}
+
+.magazine-title-input::placeholder {
+    color: #ccc;
+    font-weight: 400;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-large {
+    height: 56px !important;
+    padding: 0 48px !important;
+    font-size: 16px !important;
+    border-radius: 14px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s !important;
+}
+
+.btn-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+    background: #f5f7fa !important;
+    color: #555 !important;
+    border: none !important;
+}
+
+.btn-secondary:hover {
+    background: #e4e7eb !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2b32b2 0%, #1488cc 100%) !important;
+    border: none !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #242991 0%, #1070a8 100%) !important;
+}
+
+.back-button {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+    color: #555;
+}
+
+.back-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    color: #1488cc;
+}
+
+.plus-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #1488cc, #2b32b2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 16px rgba(20, 136, 204, 0.3);
+}
+
+.plus-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Loading overlay */
+.creating-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.creating-message {
+    background: white;
+    padding: 40px 60px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.creating-message p {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1488cc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.template-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Preview Icon Button */
+.preview-icon-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #1488cc;
+    font-size: 18px;
+    z-index: 5;
+}
+
+.template-card:hover .preview-icon-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.preview-icon-btn:hover {
+    background: #1488cc;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(20, 136, 204, 0.4);
+}
+
+.preview-icon-btn:disabled {
+    opacity: 0;
+    cursor: not-allowed;
+}
+
+/* Template Preview Modal */
+.template-preview-modal {
+    padding: 0;
+}
+
+.preview-pages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.preview-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.preview-page-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1488cc;
+    text-align: center;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #f0f7ff 100%);
+    border-radius: 8px;
+    border: 1px solid #bbdefb;
+    letter-spacing: 0.5px;
+}
+
+.preview-template-design {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    margin: 0 auto;
+    border: 1px solid #e0e0e0;
+    max-width: 100%;
+}
+
+.preview-template-design img {
+    display: block;
+}
+
+/* Custom scrollbar for preview */
+.preview-pages-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.preview-pages-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.preview-pages-container::-webkit-scrollbar-thumb {
+    background: #1488cc;
+    border-radius: 10px;
+}
+
+.preview-pages-container::-webkit-scrollbar-thumb:hover {
+    background: #1070a8;
+}
+
+@media (max-width: 768px) {
+    .preview-template-design {
+        max-height: 500px !important;
+        max-width: 100% !important;
+    }
+
+    .preview-pages-container {
+        max-height: 60vh;
+        gap: 20px;
+    }
+}

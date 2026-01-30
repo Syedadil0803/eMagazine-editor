@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import reactRefresh from '@vitejs/plugin-react-refresh';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 export default defineConfig({
   plugins: [reactRefresh()],
@@ -9,7 +11,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/src'
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@demo': fileURLToPath(new URL('./src', import.meta.url))
     }
   }
 });
