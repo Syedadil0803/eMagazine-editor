@@ -17,8 +17,10 @@ interface FlipBookExportProps {
 export const generateFlipBookHtml = ({
   pages,
   currentPageIndex,
-  templateSubject
-}: Omit<FlipBookExportProps, 'currentValues'>): string => {
+  templateSubject,
+  reviewMode = false,
+  contentVersionId = ''
+}: Omit<FlipBookExportProps, 'currentValues'> & { reviewMode?: boolean; contentVersionId?: string }): string => {
   // Use pages as-is since convertToMagazinePages already provides the correct content
   const allPages = [...pages];
 
@@ -374,6 +376,199 @@ export const generateFlipBookHtml = ({
       border-radius: 2px;
     }
 
+    /* Comment Styles */
+    .comment-marker {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: #ff4d4f;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      border: 2px solid white;
+    }
+
+    .comment-tooltip {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      display: none;
+      z-index: 101;
+    }
+
+    .comment-marker:hover .comment-tooltip {
+      display: block;
+    }
+
+    .review-active {
+      cursor: crosshair !important;
+    }
+
+    .toolbar-btn.active {
+      background: rgba(24, 144, 255, 0.3);
+      color: #1890ff;
+    }
+
+    /* Left Sidebar for Comments */
+    .comments-sidebar {
+      position: fixed;
+      left: -320px;
+      top: 50px;
+      width: 320px;
+      height: calc(100vh - 50px);
+      background: rgba(60, 64, 67, 0.98);
+      backdrop-filter: blur(10px);
+      box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      padding: 20px;
+      z-index: 1000;
+      color: #fff;
+    }
+
+    .comments-sidebar.active {
+      left: 0;
+    }
+
+    .sidebar-header {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .comment-list-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s;
+    }
+
+    .comment-list-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(24, 144, 255, 0.5);
+    }
+
+    .comment-item-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: #999;
+    }
+
+    .comment-item-text {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* Custom Comment Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .comment-modal {
+      background: #fff;
+      width: 400px;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      color: #333;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .comment-textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      resize: none;
+      font-family: inherit;
+      margin-bottom: 20px;
+      outline: none;
+    }
+
+    .comment-textarea:focus {
+      border-color: #1890ff;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      padding: 8px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel {
+      background: #f5f5f5;
+      border: 1px solid #d9d9d9;
+      color: #666;
+    }
+
+    .btn-cancel:hover {
+      background: #e8e8e8;
+    }
+
+    .btn-save {
+      background: #1890ff;
+      border: 1px solid #1890ff;
+      color: #fff;
+    }
+
+    .btn-save:hover {
+      background: #40a9ff;
+    }
+
+    body.comments-open .stage {
+      margin-left: 320px;
+    }
+
     body.search-open .stage {
       margin-right: 320px;
     }
@@ -626,6 +821,12 @@ export const generateFlipBookHtml = ({
       <i class="fas fa-expand"></i>
     </button>
 
+    ${reviewMode ? `
+    <button class="toolbar-btn" id="reviewToggleBtn" onclick="toggleReviewMode()" title="Add Comments">
+      <i class="fas fa-comment-medical"></i>
+    </button>
+    ` : ''}
+
     <button class="toolbar-btn" onclick="shareMagazine()" title="Share Magazine">
       <i class="fas fa-share-alt"></i>
     </button>
@@ -637,6 +838,26 @@ export const generateFlipBookHtml = ({
     </div>
     <div id="searchResults">
       <div class="no-results">Results will appear here</div>
+    </div>
+  </div>
+
+  <div class="comments-sidebar" id="commentsSidebar">
+    <div class="sidebar-header">
+      <span>Review Comments</span>
+    </div>
+    <div id="commentList">
+      <div class="no-results">No comments added yet</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="commentModalOverlay">
+    <div class="comment-modal">
+      <div class="modal-title">Add Page Comment</div>
+      <textarea class="comment-textarea" id="commentInput" placeholder="Enter your review comments here..."></textarea>
+      <div class="modal-footer">
+        <button class="modal-btn btn-cancel" onclick="hideCommentModal()">Cancel</button>
+        <button class="modal-btn btn-save" onclick="saveCommentFromModal()">Add Comment</button>
+      </div>
     </div>
   </div>
 
@@ -808,7 +1029,189 @@ ${slides}
         });
         
         updatePageDisplay(0);
+
+        if (${reviewMode}) {
+          initReviewSystem();
+        }
     });
+
+    // Review System Logic
+    let isReviewMode = false;
+    let comments = [];
+    const storageKey = 'review_comments_${contentVersionId}';
+    let pendingCommentData = null;
+
+    function initReviewSystem() {
+      // Load existing comments from local storage
+      const savedComments = localStorage.getItem(storageKey);
+      if (savedComments) {
+        try {
+          comments = JSON.parse(savedComments);
+          renderAllComments();
+        } catch (e) {
+          console.error('Failed to parse saved comments', e);
+        }
+      }
+
+      const book = document.getElementById('book');
+
+      // Intercept mousedown to prevent flipping when dragging on page content
+      book.addEventListener('mousedown', function(e) {
+        if (isReviewMode && e.target.closest('.page-content')) {
+          e.stopPropagation();
+        }
+      }, true); // Use capture phase
+
+      // Add click listener to the book
+      book.addEventListener('click', function(e) {
+        if (!isReviewMode) return;
+
+        const pageContent = e.target.closest('.page-content');
+        if (!pageContent) return;
+        
+        // Stop propagation to prevent PageFlip from seeing the click and flipping the page
+        e.stopPropagation();
+
+        const rect = pageContent.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        // Get the page index
+        const pageElement = pageContent.closest('.page');
+        const allPages = Array.from(document.querySelectorAll('.page'));
+        const pageIndex = allPages.indexOf(pageElement);
+
+        if (pageIndex !== -1) {
+          showCommentModal(pageIndex, x, y);
+        }
+      }, true); // Use capture phase
+
+      // Handle Enter key in modal
+      document.getElementById('commentInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          saveCommentFromModal();
+        }
+      });
+    }
+
+    function showCommentModal(pageIndex, x, y) {
+      pendingCommentData = { pageIndex, x, y };
+      const overlay = document.getElementById('commentModalOverlay');
+      const input = document.getElementById('commentInput');
+      overlay.classList.add('active');
+      input.value = '';
+      input.focus();
+    }
+
+    function hideCommentModal() {
+      document.getElementById('commentModalOverlay').classList.remove('active');
+      pendingCommentData = null;
+    }
+
+    function saveCommentFromModal() {
+      const text = document.getElementById('commentInput').value.trim();
+      if (text && pendingCommentData) {
+        addComment(pendingCommentData.pageIndex, pendingCommentData.x, pendingCommentData.y, text);
+        hideCommentModal();
+      }
+    }
+
+    function toggleReviewMode() {
+      isReviewMode = !isReviewMode;
+      const btn = document.getElementById('reviewToggleBtn');
+      const book = document.getElementById('book');
+      const sidebar = document.getElementById('commentsSidebar');
+      const body = document.getElementById('bodyRoot');
+      
+      if (isReviewMode) {
+        btn.classList.add('active');
+        book.classList.add('review-active');
+        sidebar.classList.add('active');
+        body.classList.add('comments-open');
+      } else {
+        btn.classList.remove('active');
+        book.classList.remove('review-active');
+        sidebar.classList.remove('active');
+        body.classList.remove('comments-open');
+      }
+    }
+
+    function addComment(pageIndex, x, y, text) {
+      const comment = {
+        pageIndex,
+        x,
+        y,
+        text,
+        timestamp: Date.now()
+      };
+      
+      comments.push(comment);
+      localStorage.setItem(storageKey, JSON.stringify(comments));
+      renderAllComments(); // Full re-render to update sidebar
+    }
+
+    function renderAllComments() {
+      // Clear existing markers
+      document.querySelectorAll('.comment-marker').forEach(m => m.remove());
+      
+      // Update Sidebar
+      const listContainer = document.getElementById('commentList');
+      if (comments.length === 0) {
+        listContainer.innerHTML = '<div class="no-results">No comments added yet</div>';
+      } else {
+        listContainer.innerHTML = '';
+        comments.sort((a, b) => a.pageIndex - b.pageIndex).forEach((comment, index) => {
+          // Render Marker on Page
+          renderMarkerOnPage(comment);
+          
+          // Add to Sidebar List
+          const item = document.createElement('div');
+          item.className = 'comment-list-item';
+          item.innerHTML = \`
+            <div class="comment-item-header">
+              <span>Page \${comment.pageIndex + 1}</span>
+              <span onclick="deleteComment(event, \${comment.timestamp})" style="color: #ff4d4f; cursor: pointer;"><i class="fas fa-trash"></i></span>
+            </div>
+            <div class="comment-item-text">\${comment.text}</div>
+          \`;
+          item.onclick = () => {
+            pageFlip.flip(comment.pageIndex);
+          };
+          listContainer.appendChild(item);
+        });
+      }
+    }
+
+    function renderMarkerOnPage(comment) {
+      const pages = document.querySelectorAll('.page');
+      if (comment.pageIndex >= pages.length) return;
+      
+      const pageContent = pages[comment.pageIndex].querySelector('.page-content');
+      if (!pageContent) return;
+
+      const marker = document.createElement('div');
+      marker.className = 'comment-marker';
+      marker.style.left = comment.x + '%';
+      marker.style.top = comment.y + '%';
+      marker.innerHTML = '<i class="fas fa-comment"></i><div class="comment-tooltip">' + comment.text + '</div>';
+      
+      marker.onclick = (e) => {
+        e.stopPropagation();
+        deleteComment(e, comment.timestamp);
+      };
+
+      pageContent.appendChild(marker);
+    }
+
+    function deleteComment(e, timestamp) {
+      if (e) e.stopPropagation();
+      if (confirm('Delete this comment?')) {
+        comments = comments.filter(c => c.timestamp !== timestamp);
+        localStorage.setItem(storageKey, JSON.stringify(comments));
+        renderAllComments();
+      }
+    }
 
     function updatePageDisplay(index) {
        document.getElementById('totalPages').innerText = totalPages;

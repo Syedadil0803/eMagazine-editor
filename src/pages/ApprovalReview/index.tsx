@@ -34,7 +34,9 @@ const ApprovalReviewPage: React.FC = () => {
                         const flipbookHtml = generateFlipBookHtml({
                             pages: savedData.pages,
                             currentPageIndex: 0,
-                            templateSubject: subject || 'Magazine'
+                            templateSubject: subject || 'Magazine',
+                            reviewMode: true,
+                            contentVersionId: contentVersionId
                         });
 
                         setHtmlContent(flipbookHtml);

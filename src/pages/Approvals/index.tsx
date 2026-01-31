@@ -126,9 +126,9 @@ const ApprovalsPage: React.FC = () => {
             onOk: async () => {
                 setProcessing(true);
                 try {
-                    // Retrieve page-specific comments from sessionStorage
+                    // Retrieve page-specific comments from localStorage
                     const storageKey = `review_comments_${item._id}`;
-                    const pageComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+                    const pageComments = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
                     // Construct page comments as objects: { comment, page, position }
                     const formattedPageComments = pageComments.map((c: any) => ({
@@ -151,7 +151,7 @@ const ApprovalsPage: React.FC = () => {
 
                         // Clear the temporary comments from storage
                         const storageKey = `review_comments_${item._id}`;
-                        sessionStorage.removeItem(storageKey);
+                        localStorage.removeItem(storageKey);
 
                         fetchData();
                     } else {
