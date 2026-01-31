@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from '@demo/store';
 import FlipbookEditor from './pages/FlipbookEditor';
+import FlipbookView from './pages/FlipbookView';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
@@ -46,6 +47,7 @@ function App() {
           <Route path="/approvals" element={<ApprovalsPage />} />
           <Route path="/create-magazine" element={<CreateMagazine />} />
           <Route path="/preview" element={<PreviewPage />} />
+          <Route path="/flipbook-view" element={<FlipbookView />} />
           <Route path="/admin-settings" element={<AdminSettings />} />
           <Route path="/editor" element={<FlipbookEditor />} />
         </Routes>

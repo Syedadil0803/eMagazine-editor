@@ -1,8 +1,8 @@
 import { request } from './axios.config';
 import axios from 'axios';
+import CONFIG from '@demo/config';
 
-//const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dwkp0e1yo/image/upload';
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dgj8lpind/image/upload';
+const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL || 'https://api.cloudinary.com/v1_1/dgj8lpind/image/upload';
 
 
 export const common = {

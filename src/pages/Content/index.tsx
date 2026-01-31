@@ -195,8 +195,9 @@ const ContentPage: React.FC = () => {
                 const content = contents.find(c => c._id === contentId);
                 const title = content?.title || 'Untitled';
 
-                // Navigate to preview (read-only flipbook view)
-                navigate(`/preview?content_id=${contentId}&content_version_id=${latestVersion._id}&subject=${encodeURIComponent(title)}`);
+                // Open flipbook view in new tab (same as editor's View button)
+                const viewUrl = `/flipbook-view?content_id=${contentId}&content_version_id=${latestVersion._id}&subject=${encodeURIComponent(title)}`;
+                window.open(viewUrl, '_blank');
             } else {
                 Message.warning('No published version available to preview');
             }

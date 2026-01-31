@@ -8,10 +8,6 @@ const Login: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    React.useEffect(() => {
-        console.log('Login component mounted');
-    }, []);
-
     const onFinish = async (values: any) => {
         setLoading(true);
 

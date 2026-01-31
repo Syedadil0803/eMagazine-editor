@@ -234,8 +234,7 @@ export const getUserDashboardRoute = (): string => {
     for (const page of accessiblePages) {
         const route = pageRouteMap[page.name];
         if (route) {
-            console.log(`🔀 Redirecting to ${route} (no Dashboard access)`);
-            console.log(`🔀 Redirecting to ${route} (no Dashboard access)`);
+            return route;
         }
     }
 

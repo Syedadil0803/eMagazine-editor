@@ -41,7 +41,6 @@ const Dashboard: React.FC = () => {
                 };
 
                 const mappedRole = roleMap[currentUser.role] || 'Editor';
-                console.log('🔑 Role mapping:', { backendRole: currentUser.role, mappedRole });
 
                 setUserRole(mappedRole);
                 setUserName(currentUser.name || (currentUser as any).fullName);

@@ -137,9 +137,6 @@ const PreviewPage: React.FC = () => {
                     const storageKey = `review_comments_${contentVersionId}`;
                     const existingComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
 
-                    // Convert stored format {page, text} back to {pageIndex, text, x, y}
-                    // Wait, I need to store x and y too!
-
                     iframe.contentWindow?.postMessage({
                         type: 'LOAD_COMMENTS',
                         comments: existingComments

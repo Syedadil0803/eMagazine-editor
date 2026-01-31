@@ -8,6 +8,7 @@ import { generateFlipBookHtml } from '../../components/FlipBookExport';
 import { universityChronicleData, campusReviewData } from '../../services/mockTemplates';
 import { submitForReview } from '../../services/content';
 import { submitForApproval } from '../../services/approval';
+import { createEMag, updateEMag, getEMagsByContentVersion } from '../../services/editor';
 import { Message } from '@arco-design/web-react';
 
 const PAGE_HEIGHT = 1000;
@@ -23,108 +24,190 @@ const FlipbookEditor: React.FC = () => {
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
   const [activePropertyTab, setActivePropertyTab] = useState<'element' | 'page'>('page');
+  const [currentEMagId, setCurrentEMagId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const templateId = params.get('template_id');
+    const loadExistingContent = async () => {
+      const params = new URLSearchParams(location.search);
+      const templateId = params.get('template_id');
+      const contentVersionId = params.get('content_version_id');
 
-    if (templateId) {
-      const id = parseInt(templateId, 10);
-      const templateData = id === 1 ? universityChronicleData : (id === 2 ? campusReviewData : null);
-
-      if (templateData && templateData.document && templateData.document.pages) {
-        // Default template dimensions if not specified
-        const templateWidth = templateData.document.pageSize?.width || 1240;
-        const templateHeight = templateData.document.pageSize?.height || 1754;
-
-        // Calculate scaling factors
-        const scaleX = PAGE_WIDTH / templateWidth;
-        const scaleY = PAGE_HEIGHT / templateHeight;
-
-        // Use the smaller scale factor for font sizes to ensure they don't become too large
-        const fontScale = Math.min(scaleX, scaleY);
-
-        const mappedPages: Page[] = templateData.document.pages.map((p: any) => ({
-          id: p.id,
-          backgroundColor: p.backgroundColor || '#ffffff',
-          elements: (p.elements || []).map((e: any) => {
-            // Apply scaling to position and dimensions
-            const scaledX = (e.x || 0) * scaleX;
-            const scaledY = (e.y || 0) * scaleY;
-
-            if (e.type === 'text') {
-              const scaledWidth = (e.width || 300) * scaleX;
-              const scaledFontSize = (e.font?.size || 16) * fontScale;
-
-              return {
-                id: e.id,
-                type: 'text',
-                content: e.content || '',
-                x: scaledX,
-                y: scaledY,
-                width: scaledWidth,
-                fontSize: Math.round(scaledFontSize),
-                color: e.font?.color || '#000000',
-                fontWeight: e.font?.weight?.toString() || 'normal',
-                fontFamily: e.font?.family || 'Arial',
-                textAlign: e.font?.align || 'left',
-                lineHeight: e.font?.lineHeight || 1.4,
-                fontStyle: e.font?.style || 'normal',
-                textDecoration: 'none',
-                textTransform: 'none',
-                letterSpacing: (e.font?.letterSpacing || 0) * scaleX,
-                wordSpacing: 0,
-                textIndent: 0,
-                opacity: 1,
-                textShadow: 'none',
-                backgroundColor: 'transparent',
-                padding: 4,
-                borderRadius: 0,
-                border: 'none',
-                writingMode: 'horizontal-tb',
-                direction: 'ltr',
-                whiteSpace: 'pre-wrap',
-                overflow: 'hidden'
-              };
-            } else if (e.type === 'image') {
-              const scaledWidth = (e.width || 300) * scaleX;
-              const scaledHeight = (e.height || 200) * scaleY;
-
-              return {
-                id: e.id,
-                type: 'image',
-                src: e.src,
-                alt: 'Image',
-                x: scaledX,
-                y: scaledY,
-                width: scaledWidth,
-                height: scaledHeight,
-                borderRadius: 0,
-                objectFit: 'cover'
-              };
+      // Load existing content for editing
+      if (contentVersionId && !templateId) {
+        try {
+          setIsLoading(true);
+          const emags = await getEMagsByContentVersion(contentVersionId);
+          
+          if (emags && emags.length > 0) {
+            const eMag = emags[0];
+            const savedData = JSON.parse(eMag.htmlData);
+            
+            if (savedData.pages && savedData.pages.length > 0) {
+              // Convert saved pages back to editor format
+              const convertedPages: Page[] = savedData.pages.map((page: any) => ({
+                id: page.id || generateId('page'),
+                backgroundColor: page.backgroundColor || '#ffffff',
+                elements: (page.content?.children || []).map((element: any) => ({
+                  id: generateId('element'),
+                  type: element.type,
+                  ...element.attributes,
+                  content: element.children?.[0] || ''
+                }))
+              }));
+              
+              setPages(convertedPages);
+              setCurrentEMagId(eMag._id || null);
             }
-            return null;
-          }).filter((e: any) => e !== null) as Element[]
-        }));
-
-        if (mappedPages.length > 0) {
-          setPages(mappedPages);
+          }
+        } catch (error) {
+          console.error('Error loading existing content:', error);
+          Message.error('Failed to load existing content');
+        } finally {
+          setIsLoading(false);
         }
       }
-    }
+      // Load template for new content
+      else if (templateId) {
+        const id = parseInt(templateId, 10);
+        const templateData = id === 1 ? universityChronicleData : (id === 2 ? campusReviewData : null);
+
+        if (templateData && templateData.document && templateData.document.pages) {
+          // Default template dimensions if not specified
+          const templateWidth = templateData.document.pageSize?.width || 1240;
+          const templateHeight = templateData.document.pageSize?.height || 1754;
+
+          // Calculate scaling factors
+          const scaleX = PAGE_WIDTH / templateWidth;
+          const scaleY = PAGE_HEIGHT / templateHeight;
+
+          // Use the smaller scale factor for font sizes to ensure they don't become too large
+          const fontScale = Math.min(scaleX, scaleY);
+
+          const mappedPages: Page[] = templateData.document.pages.map((p: any) => ({
+            id: p.id,
+            backgroundColor: p.backgroundColor || '#ffffff',
+            elements: (p.elements || []).map((e: any) => {
+              // Apply scaling to position and dimensions
+              const scaledX = (e.x || 0) * scaleX;
+              const scaledY = (e.y || 0) * scaleY;
+
+              if (e.type === 'text') {
+                const scaledWidth = (e.width || 300) * scaleX;
+                const scaledFontSize = (e.font?.size || 16) * fontScale;
+
+                return {
+                  id: e.id,
+                  type: 'text',
+                  content: e.content || '',
+                  x: scaledX,
+                  y: scaledY,
+                  width: scaledWidth,
+                  fontSize: Math.round(scaledFontSize),
+                  color: e.font?.color || '#000000',
+                  fontWeight: e.font?.weight?.toString() || 'normal',
+                  fontFamily: e.font?.family || 'Arial',
+                  textAlign: e.font?.align || 'left',
+                  lineHeight: e.font?.lineHeight || 1.4,
+                  fontStyle: e.font?.style || 'normal',
+                  textDecoration: 'none',
+                  textTransform: 'none',
+                  letterSpacing: (e.font?.letterSpacing || 0) * scaleX,
+                  wordSpacing: 0,
+                  textIndent: 0,
+                  opacity: 1,
+                  textShadow: 'none',
+                  backgroundColor: 'transparent',
+                  padding: 4,
+                  borderRadius: 0,
+                  border: 'none',
+                  writingMode: 'horizontal-tb',
+                  direction: 'ltr',
+                  whiteSpace: 'pre-wrap',
+                  overflow: 'hidden'
+                };
+              } else if (e.type === 'image') {
+                const scaledWidth = (e.width || 300) * scaleX;
+                const scaledHeight = (e.height || 200) * scaleY;
+
+                return {
+                  id: e.id,
+                  type: 'image',
+                  src: e.src,
+                  alt: 'Image',
+                  x: scaledX,
+                  y: scaledY,
+                  width: scaledWidth,
+                  height: scaledHeight,
+                  borderRadius: 0,
+                  objectFit: 'cover'
+                };
+              }
+              return null;
+            }).filter((e: any) => e !== null) as Element[]
+          }));
+
+          if (mappedPages.length > 0) {
+            setPages(mappedPages);
+          }
+        }
+      }
+    };
+
+    loadExistingContent();
   }, [location.search]);
 
   const handleSaveDraft = async () => {
-    // In a real implementation, we would save the current 'pages' state to the backend here.
-    // Since there isn't a specific 'save content' API provided in this task context,
-    // we'll simulate the save action and navigate back.
-    // Note: If using updatePage/updateEMag, we would serialize 'pages'.
+    try {
+      setIsLoading(true);
+      const params = new URLSearchParams(location.search);
+      const contentVersionId = params.get('content_version_id');
 
-    Message.success('Saved to draft successfully');
-    navigate('/content');
+      if (!contentVersionId) {
+        Message.error('Missing content version ID');
+        return;
+      }
+
+      // Convert pages to magazine format for saving
+      const magazinePages = convertToMagazinePages();
+      const htmlData = JSON.stringify({ pages: magazinePages });
+
+      let result;
+      if (currentEMagId) {
+        // Update existing eMag
+        result = await updateEMag(currentEMagId, {
+          content_version_id: contentVersionId,
+          htmlData
+        });
+      } else {
+        // Create new eMag
+        result = await createEMag({
+          content_version_id: contentVersionId,
+          htmlData
+        });
+        if (result.success && result.data._id) {
+          setCurrentEMagId(result.data._id);
+        }
+      }
+
+      if (result.success) {
+        Message.success('Saved to draft successfully');
+        navigate('/content');
+      } else {
+        Message.error(result.message || 'Failed to save draft');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      Message.error('An unexpected error occurred during save');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmitReview = async () => {
+    // First save the current draft
+    await handleSaveDraft();
+    
     const params = new URLSearchParams(location.search);
     const contentId = params.get('content_id');
     const contentVersionId = params.get('content_version_id');
@@ -272,7 +355,7 @@ const FlipbookEditor: React.FC = () => {
         newElement = {
           id: generateId('image'),
           type: 'image',
-          src: 'https://picsum.photos/seed/flipbook/400/300.jpg',
+          src: import.meta.env.VITE_DEFAULT_IMAGE_URL || 'https://picsum.photos/seed/flipbook/400/300.jpg',
           alt: 'Sample Image',
           x: 50,
           y: 50,
@@ -286,7 +369,7 @@ const FlipbookEditor: React.FC = () => {
         newElement = {
           id: generateId('video'),
           type: 'video',
-          src: 'https://www.w3schools.com/html/mov_bbb.mp4',
+          src: import.meta.env.VITE_DEFAULT_VIDEO_URL || 'https://www.w3schools.com/html/mov_bbb.mp4',
           x: 50,
           y: 50,
           width: 400,
@@ -300,7 +383,7 @@ const FlipbookEditor: React.FC = () => {
         newElement = {
           id: generateId('audio'),
           type: 'audio',
-          src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+          src: import.meta.env.VITE_DEFAULT_AUDIO_URL || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
           title: 'Audio Track',
           artist: 'Artist Name',
           x: 50,
@@ -372,7 +455,7 @@ const FlipbookEditor: React.FC = () => {
           title: 'Product Title',
           description: 'Product description goes here',
           price: '$99.99',
-          image: 'https://via.placeholder.com/200x150',
+          image: import.meta.env.VITE_DEFAULT_PRODUCT_IMAGE_URL || 'https://via.placeholder.com/200x150',
           x: 50,
           y: 50,
           width: 250,
@@ -873,6 +956,26 @@ const FlipbookEditor: React.FC = () => {
                     placeholder="https://example.com/video.mp4"
                   />
                 </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Width</label>
+                    <Input
+                      value={(selectedEl as any).width?.toString() || ''}
+                      onChange={(value) => updateElement(selectedEl.id, { width: parseInt(value) || 400 })}
+                      suffix="px"
+                      placeholder="400"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Height</label>
+                    <Input
+                      value={(selectedEl as any).height?.toString() || ''}
+                      onChange={(value) => updateElement(selectedEl.id, { height: parseInt(value) || 300 })}
+                      suffix="px"
+                      placeholder="300"
+                    />
+                  </div>
+                </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Poster Image URL (optional)</label>
                   <Input
@@ -908,6 +1011,26 @@ const FlipbookEditor: React.FC = () => {
                     onChange={(value) => updateElement(selectedEl.id, { src: value })}
                     placeholder="https://example.com/image.jpg"
                   />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Width</label>
+                    <Input
+                      value={(selectedEl as any).width?.toString() || ''}
+                      onChange={(value) => updateElement(selectedEl.id, { width: parseInt(value) || 300 })}
+                      suffix="px"
+                      placeholder="300"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Height</label>
+                    <Input
+                      value={(selectedEl as any).height?.toString() || ''}
+                      onChange={(value) => updateElement(selectedEl.id, { height: parseInt(value) || 200 })}
+                      suffix="px"
+                      placeholder="200"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px' }}>Alt Text</label>
@@ -975,10 +1098,10 @@ const FlipbookEditor: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '12px' }}>
-          <Button onClick={handleSaveDraft}>
+          <Button onClick={handleSaveDraft} loading={isLoading}>
             Save to Draft
           </Button>
-          <Button type="primary" status="success" onClick={handleSubmitReview}>
+          <Button type="primary" status="success" onClick={handleSubmitReview} loading={isLoading}>
             Submit to Review
           </Button>
           <Button

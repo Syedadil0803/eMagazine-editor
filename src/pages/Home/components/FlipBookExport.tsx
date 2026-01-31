@@ -624,6 +624,11 @@ ${slides}
         document.getElementById('loading').style.display = 'none';
         document.getElementById('book').style.display = 'block';
 
+        // Init comment listeners after pages are loaded
+        if (${enableComments}) {
+           initCommentListeners();
+        }
+
         pageFlip.on('flip', (e) => {
            updatePageDisplay(e.data);
         });
@@ -896,7 +901,7 @@ ${slides}
         <div style="padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;" onclick="scrollToPage(\${c.pageIndex})">
           <div style="font-weight: bold; margin-bottom: 4px;">Page \${c.pageIndex + 1}</div>
           <div style="color: #666;">\${c.text}</div>
-          <div style="font-size: 11px; color: #999; margin-top: 4px;">\${new Date(c.timestamp).toLocaleTimeString()}</div>
+          <div style="font-size: 11px; color: #999; margin-top: 40px;">\${new Date(c.timestamp).toLocaleTimeString()}</div>
         </div>
       \`).join('');
     }
