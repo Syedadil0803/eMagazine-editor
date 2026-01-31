@@ -89,7 +89,7 @@ const ApprovalsPage: React.FC = () => {
                         is_live: false,
                         created_at: item.created_at,
                         updated_at: item.created_at,
-                        contentTitle: `${item.department || 'Unknown Dept'} ${item.content_type || 'Content'}`,
+                        contentTitle: item.content?.title || `${item.department || 'Unknown Dept'} ${item.content_type || 'Content'}`,
                         created_by: 'Unknown',
                     } as ApprovalItem;
                 });
