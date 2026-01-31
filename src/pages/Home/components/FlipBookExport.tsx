@@ -16,6 +16,7 @@ interface FlipBookExportProps {
   currentValues: IEmailTemplate;
   templateSubject?: string;
   mergeTags: any;
+  enableComments?: boolean; // New prop
 }
 
 export const generateFlipBookHtml = ({
@@ -23,7 +24,8 @@ export const generateFlipBookHtml = ({
   currentPageIndex,
   currentValues,
   templateSubject,
-  mergeTags
+  mergeTags,
+  enableComments = false // Default to false
 }: FlipBookExportProps): string => {
   // Update current page content first
   const allPages = [...pages];
@@ -394,6 +396,110 @@ export const generateFlipBookHtml = ({
       height: 24px;
       background: rgba(255,255,255,0.2);
     }
+
+    /* Comment Mode Styles */
+    .comment-mode .page {
+      cursor: crosshair;
+    }
+    
+    .comment-marker {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: #ff4d4f;
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 100;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+    
+    .comment-marker:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+      z-index: 101;
+    }
+    
+    .comment-dialog {
+      position: fixed;
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      width: 300px;
+      display: none;
+      color: #333;
+    }
+    
+    .comment-dialog.active {
+      display: block;
+    }
+    
+    .comment-dialog textarea {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 12px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: none;
+      font-family: inherit;
+    }
+    
+    .comment-dialog-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    .btn-submit {
+      background: #1890ff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .btn-cancel {
+      background: #f5f5f5;
+      color: #666;
+      border: 1px solid #ddd;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .comment-sidebar {
+      position: fixed;
+      left: -320px;
+      top: 50px;
+      width: 300px;
+      height: calc(100vh - 50px);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      transition: left 0.3s ease;
+      z-index: 999;
+      padding: 20px;
+      overflow-y: auto;
+      color: #333;
+    }
+    
+    .comment-sidebar.active {
+      left: 0;
+    }
+    
+    body.comments-open .stage {
+      margin-left: 300px;
+    }
   </style>
 </head>
 <body id="bodyRoot">
@@ -424,12 +530,36 @@ export const generateFlipBookHtml = ({
     </div>
   </div>
 
+  ${enableComments ? `
+  <div class="toolbar-btn" style="margin-left: auto; margin-right: 20px;" onclick="toggleCommentMode()" title="Toggle Comments">
+    <i class="fas fa-comment-alt" id="commentIcon"></i>
+  </div>
+  ` : ''}
+
   <div class="search-sidebar" id="searchSidebar">
     <div class="close-search" onclick="toggleSearch(false)">
       ← Close
     </div>
     <div id="searchResults">
       <div class="no-results">Results will appear here</div>
+    </div>
+  </div>
+
+  <div class="comment-sidebar" id="commentSidebar">
+    <h3 style="margin-bottom: 20px;">Comments</h3>
+    <div id="commentsList">
+      <!-- Comments will be listed here -->
+      <div style="text-align: center; color: #999; margin-top: 40px;">
+        Click on any page to add a comment
+      </div>
+    </div>
+  </div>
+
+  <div class="comment-dialog" id="commentDialog">
+    <textarea id="commentInput" placeholder="Type your comment..."></textarea>
+    <div class="comment-dialog-buttons">
+      <button class="btn-cancel" onclick="closeCommentDialog()">Cancel</button>
+      <button class="btn-submit" onclick="submitComment()">Post</button>
     </div>
   </div>
 
@@ -486,6 +616,11 @@ ${slides}
         totalPages = pages.length;
         pageFlip.loadFromHTML(pages);
         
+        // Init comment listeners after pages are loaded
+        if (${enableComments}) {
+           initCommentListeners();
+        }
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('book').style.display = 'block';
 
@@ -618,6 +753,168 @@ ${slides}
        currentScale = value / 100;
        document.getElementById('book').style.transform = 'scale(' + currentScale + ')';
     }
+
+    /* Comment Functionality */
+    let isCommentMode = false;
+    let pendingComment = null;
+    let comments = [];
+
+    function toggleCommentMode() {
+      isCommentMode = !isCommentMode;
+      const body = document.body;
+      const icon = document.getElementById('commentIcon');
+      const sidebar = document.getElementById('commentSidebar');
+      
+      if (isCommentMode) {
+        body.classList.add('comment-mode');
+        body.classList.add('comments-open');
+        icon.style.color = '#1890ff';
+        sidebar.classList.add('active');
+      } else {
+        body.classList.remove('comment-mode');
+        body.classList.remove('comments-open');
+        icon.style.color = 'inherit';
+        sidebar.classList.remove('active');
+        closeCommentDialog();
+      }
+    }
+
+    // Initialize click listeners for pages
+    function initCommentListeners() {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach((page, index) => {
+        page.addEventListener('click', (e) => {
+          if (!isCommentMode) return;
+          
+          // Stop propagation to prevent page-flip from turning the page
+          e.stopPropagation();
+          e.preventDefault();
+          
+          // Prevent triggering if clicked on existing marker
+          if (e.target.classList.contains('comment-marker')) return;
+
+          const rect = page.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / currentScale; // Adjust for zoom
+          const y = (e.clientY - rect.top) / currentScale;
+          
+          const percentX = (x / page.offsetWidth) * 100;
+          const percentY = (y / page.offsetHeight) * 100;
+
+          showCommentDialog(e.clientX, e.clientY, {
+            pageIndex: index,
+            x: percentX,
+            y: percentY
+          });
+        });
+
+        // Also stop mousedown to prevent page-flip's internal drag/click logic
+        page.addEventListener('mousedown', (e) => {
+          if (isCommentMode) {
+            e.stopPropagation();
+          }
+        }, true); // Use capture phase to intercept early
+      });
+    }
+
+    function showCommentDialog(screenX, screenY, position) {
+      const dialog = document.getElementById('commentDialog');
+      const input = document.getElementById('commentInput');
+      
+      pendingComment = position;
+      
+      // Position dialog near the click, but keep within viewport
+      let left = screenX + 20;
+      let top = screenY;
+      
+      if (left + 300 > window.innerWidth) left = window.innerWidth - 320;
+      if (top + 200 > window.innerHeight) top = window.innerHeight - 220;
+      
+      dialog.style.left = left + 'px';
+      dialog.style.top = top + 'px';
+      dialog.classList.add('active');
+      
+      input.value = '';
+      input.focus();
+    }
+
+    function closeCommentDialog() {
+      document.getElementById('commentDialog').classList.remove('active');
+      pendingComment = null;
+    }
+
+    function submitComment() {
+      const text = document.getElementById('commentInput').value.trim();
+      if (!text || !pendingComment) return;
+      
+      const newComment = {
+        id: Date.now().toString(),
+        text: text,
+        pageIndex: pendingComment.pageIndex,
+        x: pendingComment.x,
+        y: pendingComment.y,
+        timestamp: new Date().toISOString()
+      };
+      
+      addCommentMarker(newComment);
+      comments.push(newComment);
+      renderSidebarComments();
+      
+      // Send to parent
+      window.parent.postMessage({ type: 'NEW_COMMENT', comment: newComment }, '*');
+      
+      closeCommentDialog();
+    }
+
+    function addCommentMarker(comment, index) {
+      const pages = document.querySelectorAll('.page');
+      if (!pages[comment.pageIndex]) return;
+      
+      const marker = document.createElement('div');
+      marker.className = 'comment-marker';
+      marker.innerText = (index !== undefined ? index : comments.length) + 1;
+      marker.title = comment.text;
+      
+      marker.style.left = comment.x + '%';
+      marker.style.top = comment.y + '%';
+      
+      marker.onclick = (e) => {
+        e.stopPropagation();
+        alert(comment.text); // Simple view for now
+      };
+      
+      pages[comment.pageIndex].appendChild(marker);
+    }
+    
+    function renderSidebarComments() {
+      const list = document.getElementById('commentsList');
+      if (comments.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: #999; margin-top: 40px;">Click on any page to add a comment</div>';
+        return;
+      }
+      
+      list.innerHTML = comments.map((c, i) => \`
+        <div style="padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;" onclick="scrollToPage(\${c.pageIndex})">
+          <div style="font-weight: bold; margin-bottom: 4px;">Page \${c.pageIndex + 1}</div>
+          <div style="color: #666;">\${c.text}</div>
+          <div style="font-size: 11px; color: #999; margin-top: 4px;">\${new Date(c.timestamp).toLocaleTimeString()}</div>
+        </div>
+      \`).join('');
+    }
+
+    function scrollToPage(index) {
+       pageFlip.flip(index);
+    }
+
+    // Listen for connection from parent
+    window.addEventListener('message', (event) => {
+       if (event.data.type === 'LOAD_COMMENTS') {
+           comments = event.data.comments || [];
+           // Clear existing markers first if any
+           document.querySelectorAll('.comment-marker').forEach(m => m.remove());
+           comments.forEach((c, i) => addCommentMarker(c, i));
+           renderSidebarComments();
+       }
+    });
 
     function toggleFullscreen() {
        if (!document.fullscreenElement) {

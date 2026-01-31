@@ -134,10 +134,25 @@ const ApprovalsPage: React.FC = () => {
 
         setProcessing(true);
         try {
+            // Retrieve page-specific comments from sessionStorage
+            const storageKey = `review_comments_${currentProcessItem._id}`;
+            const pageComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+
+            // Format page comments as "Page X: Comment"
+            const formattedPageComments = pageComments.map((c: any) => `Page ${c.pageIndex + 1}: ${c.text}`);
+
+            // Collect all comments into an array
+            // Include general comment from modal as the first item if it's not empty
+            const allComments: string[] = [];
+            if (processComment.trim()) {
+                allComments.push(processComment.trim());
+            }
+            allComments.push(...formattedPageComments);
+
             const payload = {
                 approver_user_id: currentUser.id,
                 action: processAction,
-                comments: processComment
+                comments: allComments // Sending as array of strings
             };
 
             // Use approval_id for the process call
@@ -146,6 +161,11 @@ const ApprovalsPage: React.FC = () => {
             if (res.success) {
                 Message.success(`Content ${processAction} successfully!`);
                 setProcessModalVisible(false);
+
+                // Clear the temporary comments from storage
+                const storageKey = `review_comments_${currentProcessItem._id}`;
+                sessionStorage.removeItem(storageKey);
+
                 fetchData();
             } else {
                 Message.error(res.message);

@@ -46,7 +46,7 @@ export const submitForApproval = async (payload: SubmitApprovalPayload): Promise
 export interface ProcessApprovalPayload {
     approver_user_id: string;
     action: 'approved' | 'rejected';
-    comments: string;
+    comments: string | string[];
 }
 
 /**
