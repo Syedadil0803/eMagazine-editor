@@ -41,11 +41,21 @@ export const generateFlipBookHtml = ({
     .map((page, index) => {
       const isCover = page.type === "cover" || page.type === "back_cover";
 
+      const transformedContent = {
+        type: page.content?.type || 'page',
+        children: page.content?.children || [],
+        data: { 
+          value: '', // Add required data.value property
+          hidden: false // Add required data.hidden property
+        },
+        attributes: {}
+      };
+
       const fullHtml = mjml(
         JsonToMjml({
-          data: page.content,
+          data: transformedContent,
           mode: "production",
-          context: page.content,
+          context: transformedContent,
           dataSource: mergeTags,
         }),
         {

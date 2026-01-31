@@ -236,7 +236,10 @@ const ApprovalsPage: React.FC = () => {
                         size="small"
                         type="secondary"
                         style={{ borderRadius: '6px' }}
-                        onClick={() => navigate(`/preview?content_id=${record.content_id}&content_version_id=${record._id}&subject=${encodeURIComponent(record.contentTitle)}`)}
+                        onClick={() => {
+                            const viewUrl = `/approval-review?content_id=${record.content_id}&content_version_id=${record._id}&subject=${encodeURIComponent(record.contentTitle)}`;
+                            window.open(viewUrl, '_blank');
+                        }}
                     >
                         Review
                     </Button>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Message, Button } from '@arco-design/web-react';
+import { Message, Button, Card, Space, Tag } from '@arco-design/web-react';
 import { getEMagsByContentVersion } from '@demo/services/editor';
 import { generateFlipBookHtml } from '@demo/pages/Home/components/FlipBookExport';
 import { Loading } from '@demo/components/loading';
@@ -32,14 +32,14 @@ const PreviewPage: React.FC = () => {
                     const savedData = JSON.parse(eMag.htmlData);
 
                     if (savedData.pages && savedData.pages.length > 0) {
-                        // Generate flipbook HTML using the same function as editor
+                        // Generate flipbook HTML using the same function as FlipbookView
                         const flipbookHtml = generateFlipBookHtml({
                             pages: savedData.pages,
                             currentPageIndex: 0,
                             currentValues: {
                                 subject: subject || 'Magazine',
                                 subTitle: '',
-                                content: savedData.pages[0].content
+                                content: savedData.pages[0].content || {}
                             },
                             templateSubject: subject || 'Magazine',
                             mergeTags: {},
@@ -54,8 +54,8 @@ const PreviewPage: React.FC = () => {
                     Message.warning('No magazine data found. Please edit and save the content first.');
                 }
             } catch (error) {
-                console.error('Error loading preview:', error);
-                Message.error('Failed to load preview');
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                Message.error(`Failed to load preview: ${errorMessage}`);
             } finally {
                 setLoading(false);
             }
@@ -63,26 +63,6 @@ const PreviewPage: React.FC = () => {
 
         loadPreview();
     }, [contentVersionId, subject, navigate]);
-
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'NEW_COMMENT') {
-                const newComment = event.data.comment;
-                console.log('New comment received:', newComment);
-
-                // Save to sessionStorage (full object to support reloading)
-                const storageKey = `review_comments_${contentVersionId}`;
-                const existingComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
-                const updatedComments = [...existingComments, newComment];
-                sessionStorage.setItem(storageKey, JSON.stringify(updatedComments));
-
-                Message.success('Comment added successfully');
-            }
-        };
-
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, [contentVersionId]);
 
     if (loading) {
         return (

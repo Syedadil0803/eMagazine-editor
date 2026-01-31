@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import store from '@demo/store';
 import FlipbookEditor from './pages/FlipbookEditor';
 import FlipbookView from './pages/FlipbookView';
+import ApprovalReview from './pages/ApprovalReview';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
@@ -48,6 +49,7 @@ function App() {
           <Route path="/create-magazine" element={<CreateMagazine />} />
           <Route path="/preview" element={<PreviewPage />} />
           <Route path="/flipbook-view" element={<FlipbookView />} />
+          <Route path="/approval-review" element={<ApprovalReview />} />
           <Route path="/admin-settings" element={<AdminSettings />} />
           <Route path="/editor" element={<FlipbookEditor />} />
         </Routes>
