@@ -308,7 +308,6 @@ const PoliciesTab: React.FC = () => {
                     <Select
                         placeholder="Select role"
                         onChange={(value: string) => {
-                            console.log('🔄 Policy role changed:', value);
                             setSelectedRoleId(value);
                             // Reset resource selection when role changes
                             form.setFieldsValue({ resourceId: undefined });

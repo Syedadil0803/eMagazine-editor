@@ -1,7 +1,8 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+import CONFIG from '@demo/config';
 
 export const axiosInstance = axios.create({
-  baseURL: "https://api.cwd.speedstack.tech/campaign",
+  baseURL: CONFIG.AUTH_API_URL,
 });
 
 axiosInstance.interceptors.request.use(async function (config) {
