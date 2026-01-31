@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Tag, Message, Modal, Space, Skeleton, Input } from '@arco-design/web-react';
+import { Table, Button, Tag, Message, Modal, Space, Skeleton } from '@arco-design/web-react';
 import { IconCheck, IconPublic, IconEye } from '@arco-design/web-react/icon';
 import DashboardLayout from '../Dashboard/Layout';
 import { getCurrentUser } from '@demo/services/auth';
@@ -37,11 +37,6 @@ const ApprovalsPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [approvals, setApprovals] = useState<ApprovalItem[]>([]);
 
-    // Approval/Rejection Modal State
-    const [processModalVisible, setProcessModalVisible] = useState(false);
-    const [currentProcessItem, setCurrentProcessItem] = useState<ApprovalItem | null>(null);
-    const [processAction, setProcessAction] = useState<'approved' | 'rejected'>('approved');
-    const [processComment, setProcessComment] = useState('');
     const [processing, setProcessing] = useState(false);
 
     const currentUser = getCurrentUser();
@@ -86,16 +81,16 @@ const ApprovalsPage: React.FC = () => {
                     else if (item.status && item.status.toLowerCase().includes('published')) state = 'published';
 
                     return {
-                        _id: item.content_version_id, // Use content_version_id as the compatible ID for ContentVersion (preview, publish)
+                        _id: item.content_version_id, // Use content_version_id units
                         approval_id: item._id, // Use approval instance ID for approval actions
-                        content_id: item.content_version_id, // Fallback content_id if needed, or item.content_id if available
+                        content_id: item.content_version_id,
                         version_number: item.approval_level ? `Level ${item.approval_level}` : 'N/A',
                         state: state,
                         is_live: false,
                         created_at: item.created_at,
                         updated_at: item.created_at,
                         contentTitle: `${item.department || 'Unknown Dept'} ${item.content_type || 'Content'}`,
-                        created_by: 'Unknown', // Not provided
+                        created_by: 'Unknown',
                     } as ApprovalItem;
                 });
 
@@ -122,40 +117,54 @@ const ApprovalsPage: React.FC = () => {
         fetchData();
     }, []);
 
-    const openProcessModal = (item: ApprovalItem, action: 'approved' | 'rejected') => {
-        setCurrentProcessItem(item);
-        setProcessAction(action);
-        setProcessComment(action === 'approved' ? 'Great!' : '');
-        setProcessModalVisible(true);
-    };
+    const handleProcessSubmit = async (item: ApprovalItem, action: 'approved' | 'rejected') => {
+        if (!currentUser) return;
 
-    const handleProcessSubmit = async () => {
-        if (!currentProcessItem || !currentUser) return;
+        Modal.confirm({
+            title: action === 'approved' ? 'Approve Content' : 'Reject Content',
+            content: `Are you sure you want to ${action} "${item.contentTitle}"?`,
+            onOk: async () => {
+                setProcessing(true);
+                try {
+                    // Retrieve page-specific comments from sessionStorage
+                    const storageKey = `review_comments_${item._id}`;
+                    const pageComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
 
-        setProcessing(true);
-        try {
-            const payload = {
-                approver_user_id: currentUser.id,
-                action: processAction,
-                comments: processComment
-            };
+                    // Construct page comments as objects: { comment, page, position }
+                    const formattedPageComments = pageComments.map((c: any) => ({
+                        comment: c.text,
+                        page: c.pageIndex + 1,
+                        position: `${c.x.toFixed(1)}%, ${c.y.toFixed(1)}%`
+                    }));
 
-            // Use approval_id for the process call
-            const res = await services.approval.processApproval(currentProcessItem.approval_id, payload);
+                    const payload = {
+                        approver_user_id: currentUser.id,
+                        action: action,
+                        comments: formattedPageComments
+                    };
 
-            if (res.success) {
-                Message.success(`Content ${processAction} successfully!`);
-                setProcessModalVisible(false);
-                fetchData();
-            } else {
-                Message.error(res.message);
+                    // Use approval_id for the process call
+                    const res = await services.approval.processApproval(item.approval_id, payload);
+
+                    if (res.success) {
+                        Message.success(`Content ${action} successfully!`);
+
+                        // Clear the temporary comments from storage
+                        const storageKey = `review_comments_${item._id}`;
+                        sessionStorage.removeItem(storageKey);
+
+                        fetchData();
+                    } else {
+                        Message.error(res.message);
+                    }
+                } catch (error) {
+                    console.error('Processing error:', error);
+                    Message.error('An error occurred while processing content.');
+                } finally {
+                    setProcessing(false);
+                }
             }
-        } catch (error) {
-            console.error('Processing error:', error);
-            Message.error('An error occurred while processing content.');
-        } finally {
-            setProcessing(false);
-        }
+        });
     };
 
     const handlePublish = (item: ApprovalItem) => {
@@ -166,8 +175,8 @@ const ApprovalsPage: React.FC = () => {
             content: `Are you sure you want to publish "${item.contentTitle}" (Version ${item.version_number})? It will become the live version.`,
             onOk: async () => {
                 const payload = {
-                    content_id: item.content_id, // Ensure this is the correct content_id
-                    content_version_id: item._id!, // Mapped to content_version_id
+                    content_id: item.content_id,
+                    content_version_id: item._id!,
                     published_by: currentUser.id
                 };
 
@@ -240,7 +249,8 @@ const ApprovalsPage: React.FC = () => {
                                 size="small"
                                 icon={<IconCheck />}
                                 style={{ borderRadius: '6px', background: '#00B42A', border: 'none' }}
-                                onClick={() => openProcessModal(record, 'approved')}
+                                onClick={() => handleProcessSubmit(record, 'approved')}
+                                loading={processing}
                             >
                                 Approve
                             </Button>
@@ -249,7 +259,8 @@ const ApprovalsPage: React.FC = () => {
                                 status="danger"
                                 size="small"
                                 style={{ borderRadius: '6px' }}
-                                onClick={() => openProcessModal(record, 'rejected')}
+                                onClick={() => handleProcessSubmit(record, 'rejected')}
+                                loading={processing}
                             >
                                 Reject
                             </Button>
@@ -320,30 +331,6 @@ const ApprovalsPage: React.FC = () => {
                     )}
                 </div>
             </div>
-
-            <Modal
-                title={processAction === 'approved' ? 'Approve Content' : 'Reject Content'}
-                visible={processModalVisible}
-                onOk={handleProcessSubmit}
-                onCancel={() => setProcessModalVisible(false)}
-                confirmLoading={processing}
-                okText={processAction === 'approved' ? 'Approve' : 'Reject'}
-                okButtonProps={{
-                    status: processAction === 'approved' ? 'success' : 'danger'
-                }}
-            >
-                <div>
-                    <div style={{ marginBottom: '8px', fontWeight: 500 }}>
-                        Comments (Optional):
-                    </div>
-                    <Input.TextArea
-                        rows={4}
-                        placeholder="Add your comments here..."
-                        value={processComment}
-                        onChange={(value: string) => setProcessComment(value)}
-                    />
-                </div>
-            </Modal>
         </DashboardLayout>
     );
 };

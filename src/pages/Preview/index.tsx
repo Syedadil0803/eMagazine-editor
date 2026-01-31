@@ -42,7 +42,8 @@ const PreviewPage: React.FC = () => {
                                 content: savedData.pages[0].content
                             },
                             templateSubject: subject || 'Magazine',
-                            mergeTags: {}
+                            mergeTags: {},
+                            enableComments: true
                         });
 
                         setHtmlContent(flipbookHtml);
@@ -62,6 +63,26 @@ const PreviewPage: React.FC = () => {
 
         loadPreview();
     }, [contentVersionId, subject, navigate]);
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'NEW_COMMENT') {
+                const newComment = event.data.comment;
+                console.log('New comment received:', newComment);
+
+                // Save to sessionStorage (full object to support reloading)
+                const storageKey = `review_comments_${contentVersionId}`;
+                const existingComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+                const updatedComments = [...existingComments, newComment];
+                sessionStorage.setItem(storageKey, JSON.stringify(updatedComments));
+
+                Message.success('Comment added successfully');
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [contentVersionId]);
 
     if (loading) {
         return (
@@ -111,6 +132,16 @@ const PreviewPage: React.FC = () => {
             <iframe
                 title="Magazine Preview"
                 srcDoc={htmlContent}
+                onLoad={(e) => {
+                    const iframe = e.currentTarget;
+                    const storageKey = `review_comments_${contentVersionId}`;
+                    const existingComments = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+
+                    iframe.contentWindow?.postMessage({
+                        type: 'LOAD_COMMENTS',
+                        comments: existingComments
+                    }, '*');
+                }}
                 style={{
                     width: '100%',
                     height: '100%',
